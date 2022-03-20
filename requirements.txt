@@ -1,0 +1,9 @@
+Django==3.1
+django-rest-swagger==2.2.0
+coreschema==0.0.4
+djangorestframework==3.11.1
+djongo
+django-crispy-forms
+drf-yasg==1.20.0
+django-filter==2.4.0
+
