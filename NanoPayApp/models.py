@@ -14,25 +14,26 @@ class UserProfileManager(BaseUserManager):
 
     def create_user(self, 
         phone, 
-        password,
-        genre,
-        dateDeNaissance,
-        email = "", 
-        nom = "", 
-        prenom = "", 
+        password ,
+        nom = None,
+        email = None,
+        genre = None,
+        prenom = None, 
+        dateDeNaissance = None,
         ):
         """create the new user profile"""
         if not phone:
             raise ValueError("User most have a phone number")
 
-        email = self.normalize_email(email)
-        user = self.model(email=email, 
-            nom=nom , 
+       # email = self.normalize_email(email)
+        user = self.model(
+            nom = nom , 
             phone = phone, 
+            email = email,
             genre = genre,
             prenom = prenom,
-            dateDeNaissance = dateDeNaissance)
-
+            dateDeNaissance = dateDeNaissance,
+        )
         user.set_password(password)
         user.save(using=self._db)
 
@@ -40,14 +41,20 @@ class UserProfileManager(BaseUserManager):
 
     def create_superuser(self, 
         phone, 
-        password,
-        genre,
-        dateDeNaissance,
-        email = "", 
-        nom = "", 
-        prenom = "",):
+        password ,
+        nom = None,
+        email = None,
+        genre = None,
+        prenom = None, 
+        dateDeNaissance = None,):
         """create and save superuser with given detail"""
-        user = self.create_user(phone, password, genre, dateDeNaissance, email, nom, prenom)
+        user = self.create_user(nom = nom , 
+            phone = phone, 
+            email = email,
+            genre = genre,
+            prenom = prenom,
+            dateDeNaissance = dateDeNaissance,
+            password = password)
 
         user.is_superuser = True
         user.is_staff = True
@@ -75,7 +82,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=255, unique=True, blank = True, null= True)
     nom = models.CharField(max_length=255, blank = True, null= True)
-    prenom = models.CharField(max_length=255, blank = True)
+    prenom = models.CharField(max_length=255, null= True, blank = True)
     phone = models.CharField(max_length=255, unique=True)
     dateDeNaissance = models.DateField(blank = True, null = True)
     genre = models.CharField(max_length=25, choices=Genre, blank = True, null= True)
@@ -83,7 +90,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     
     # abonnes   = models.ForeignKey('self', related_name = "abonne", on_delete=models.CASCADE, null = True)
 
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     objects = UserProfileManager()

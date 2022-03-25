@@ -1,5 +1,4 @@
 import requests
-from requests_toolbelt.multipart.encoder import MultipartEncoder
 import json
 
 # r = requests.get("https://apiforproject.herokuapp.com/api/UserProfile/")
@@ -9,33 +8,22 @@ import json
 # print(r.text)
 # print('----------------')
 
-data = {
-  "email": "monmail@gmail.com",
-  "nom": "onana",
-  "prenom": "",
-  "phone": "60889",
-  "password":"123456",
-  "avatar" : ""
-}
-
-multipart_data = MultipartEncoder(
- fields={
-  "email": "monmail@gmail.com",
-  "nom": "onana",
-  "prenom": "",
-  "phone": "60889",
-  "password":"123456",
-  "avatar" : ""
-}
-
-)
+data = {"username" : "000",
+		"password" : "000"}
 
 
-r = requests.post("http://127.0.0.1:8000/api/UserProfile/" ,  data = data)
+
+
+
+#r = requests.post("http://127.0.0.1:8000/api/UserProfile/" ,  data = data)
 # r = requests.post("http://127.0.0.1:8000/api/UserProfile/" ,  data=multipart_data,
 #                   headers={'Content-Type': multipart_data.content_type})
+
+r = requests.post("http://127.0.0.1:8001/api/api-token-auth/" ,  data = data)
 
 print(r.status_code)
 print('----------------')
 print(r.text)
+print('----------------')
+print(r.headers)
 print('----------------')

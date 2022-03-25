@@ -1,6 +1,8 @@
+from email import message
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets, filters , generics
 from rest_framework.authentication import TokenAuthentication
@@ -23,6 +25,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
+#from NanoPayApp.models import *
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -31,9 +34,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = models.UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
     #permission_classes = (permissions.UpdateOwnProfile,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('nom', 'email',)
-    parser_classes = (MultiPartParser,FormParser)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter, )
+    search_fields = ('nom', 'email','phone',)
+    filter_fields = ('phone',)
+    parser_classes = (MultiPartParser,FormParser) 
 
     def get_user(self, id):
         try:
@@ -41,8 +45,21 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         except models.UserProfile.DoesNotExist:
             return HttpResponseBadRequest(status=status.HTTP_404_NOT_FOUND)
         
-class CustomAuthToken(ObtainAuthToken):
+class UserList(generics.ListAPIView):
+    serializer_class = serializers.UserProfileSerializer
 
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases for
+        the user as determined by the username portion of the URL.
+        """
+        phone = int(self.kwargs['telephone'])
+        return models.UserProfile.objects.filter(phone=phone)
+        
+class CustomAuthToken(ObtainAuthToken, CreateAPIView):
+
+    parser_classes = (MultiPartParser,FormParser) 
+    
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
@@ -52,7 +69,7 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({
             'token': token.key,
             'user_id': user.pk,
-            'email': user.email
+            'telephone': user.phone
         })
 
 class Logout(APIView):
@@ -62,12 +79,17 @@ class Logout(APIView):
     def delete(self, request, format=None):
         # simply delete the token to force a login
         request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+        response = {
+                "status": "success",
+                "message": "successfully logout",
+            }
+        return Response(response , status=status.HTTP_200_OK)
     
 class ChangePasswordView(generics.UpdateAPIView):
     """
     An endpoint for changing password.
     """
+    parser_classes = (MultiPartParser,FormParser) 
 
     serializer_class = serializers.ChangePasswordSerializer
     model = models.UserProfile

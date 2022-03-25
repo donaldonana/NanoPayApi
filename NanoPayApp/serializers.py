@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 
 from NanoPayApp import models
 
@@ -12,6 +13,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if self.context["request"].method == "PUT":
             self.fields.pop("password")
             self.fields.pop("phone")
+        if "data" in kwargs.keys():  
+            self.f = kwargs["data"]
             
             
 
@@ -28,6 +31,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 }
             }, 
         }
+        
+    def create(self, validated_data):
+        """create the return new user"""
+        if self.f is not None:
+            allowed = set(self.f.keys())
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                validated_data[field_name] = None
+
+        user = models.UserProfile.objects.create_user(
+            email =  validated_data['email'],
+            nom =  validated_data['nom'],
+            phone =  validated_data['phone'],
+            prenom = validated_data['prenom'],
+            dateDeNaissance = validated_data['dateDeNaissance'],
+            password = validated_data['password']
+        )
+
+        return user
    
 class ChangePasswordSerializer(serializers.Serializer):
     model = models.UserProfile
@@ -91,4 +113,25 @@ class ParametreCarteSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
         
+class AuthTokenSerializer(serializers.Serializer):
+    """Serializer for user authentication object"""
+
+    email = serializers.CharField()
+    password = serializers.CharField(style = {'input_type' : 'password' }, trim_whitespace = False)
+
+    def validate(self, attrs):
+        """Validate and authentiate the user"""
+
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        user = authenticate(request = self.context.get('request'), username = email , password = password)
+
+        if not user:
+            msg = ('Unable to authenticate with provided credentials.')
+            raise serializers.ValidationError(msg, code='authorization')
+
+        attrs['user'] = user
+
+        return attrs
         
