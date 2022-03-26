@@ -35,7 +35,16 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'nom', 'prenom', 'dateDeNaissance',
                   'genre')
         
-    
+
+
+class UserLoginSerializer(serializers.Serializer):
+    model = models.UserProfile
+
+    """
+    """
+    password = serializers.CharField(required=True)
+
+
       
       
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -168,4 +177,5 @@ class AuthTokenSerializer(serializers.Serializer):
         attrs['user'] = user
 
         return attrs
+    
         

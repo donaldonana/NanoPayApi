@@ -1,3 +1,4 @@
+from unicodedata import name
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from django.conf.urls import  url
@@ -15,10 +16,14 @@ router.register('UserProfile', views.UserProfileViewSet)
 
 urlpatterns = [
 
-    path('', include(router.urls)),
-    path("login/", views.CustomAuthToken.as_view()),
-    path("user/", views.UserCreateView.as_view()),
-    url(r'^user/info/(?P<telephone>\d+)/$', views.UserInfoView.as_view(), name= 'UserInfo'),
+    #path('', include(router.urls)),
+    #path("login/", views.CustomAuthToken.as_view()),
+    path("user/", views.UserCreateView.as_view(), name = "user", ),
+    path('user/info/<telephone>/', views.UserInfoView.as_view(), name= 'UserInfo'),
+    path('user/<telephone>/', views.UserLoginView.as_view(), name= 'UserLogin'),
+    #url(r'^user/(?P<telephone>\d+)/$', views.UserLoginView.as_view(), name= 'UserLogin'),
+    
+    
     
     #path("change-password/", views.ChangePasswordView.as_view()),
     #path("logout/", views.Logout.as_view()), UserInfoView

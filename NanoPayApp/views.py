@@ -23,14 +23,18 @@ from rest_framework.permissions import (
     DjangoModelPermissions,
 )
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from django.contrib.auth import authenticate
+
 
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
 #from NanoPayApp.models import *
 
+
+
 class UserCreateView(generics.CreateAPIView):
     parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.UserInfoSerializer
+    serializer_class = serializers.UserSerializer
     
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -64,8 +68,38 @@ class UserInfoView(generics.CreateAPIView):
         return Response(response)
         
         
+
+class UserLoginView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserLoginSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        password = serializer.data.get("password")
+        phone = self.kwargs["telephone"]
+        user = authenticate(request, username = phone , password = password)
         
+        if (not user):
+            
+            reponse = {"detail": "Unable to authenticate with provided credentials"}
+            
+            return Response(
+                        reponse,
+                        status=status.HTTP_404_NOT_FOUND,   
+                    )
         
+        return Response(
+            data = {"id": user.id,
+                    "telephone": user.phone,
+                    "nom": user.nom,
+                    "prenom": user.prenom,
+                    "dateDeNaissance": user.dateDeNaissance,
+                    "genre": user.genre
+                    }
+        )
+          
             
 
 
