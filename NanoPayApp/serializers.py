@@ -32,7 +32,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     
     class Meta :
         model = models.UserProfile
-        fields = ('id', 'nom', 'prenom', 'dateDeNaissance',
+        fields = ('id', 'phone', 'nom', 'prenom', 'dateDeNaissance',
                   'genre')
         
 

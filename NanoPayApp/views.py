@@ -52,7 +52,7 @@ class UserInfoView(generics.CreateAPIView):
         
     def create(self, request, *args, **kwargs):
         
-        phone = self.kwargs["telephone"]
+        phone = request.data["phone"]
         user = get_object_or_404(models.UserProfile ,phone = phone)  
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)

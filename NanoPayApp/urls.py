@@ -19,7 +19,7 @@ urlpatterns = [
     #path('', include(router.urls)),
     #path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
-    path('user/info/<telephone>/', views.UserInfoView.as_view(), name= 'UserInfo'),
+    path('user/info/', views.UserInfoView.as_view(), name= 'UserInfo'),
     path('user/<telephone>/', views.UserLoginView.as_view(), name= 'UserLogin'),
     #url(r'^user/(?P<telephone>\d+)/$', views.UserLoginView.as_view(), name= 'UserLogin'),
     
