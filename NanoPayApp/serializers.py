@@ -42,7 +42,6 @@ class UserLoginSerializer(serializers.Serializer):
 
     """
     """
-    password = serializers.CharField(required=True)
 
 
       

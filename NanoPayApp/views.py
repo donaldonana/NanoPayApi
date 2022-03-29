@@ -57,27 +57,22 @@ class UserInfoView(generics.CreateAPIView):
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        response = serializer.data
-        
-        pos = list(response.keys()).index('id')
-        items = list(response.items())
-        items.insert(pos+1, ('telephone',  user.phone))
-        response = dict(items)
         
         
-        return Response(response)
+        
+        return Response(serializer.data)
         
         
 
-class UserLoginView(generics.CreateAPIView):
+class UserLoginView(generics.ListAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.UserLoginSerializer
     
-    def create(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        password = serializer.data.get("password")
+        password = self.kwargs["password"]
         phone = self.kwargs["telephone"]
         user = authenticate(request, username = phone , password = password)
         
@@ -101,6 +96,9 @@ class UserLoginView(generics.CreateAPIView):
         )
           
             
+
+
+
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
