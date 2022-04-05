@@ -1,8 +1,50 @@
-from rest_framework import serializers
+from rest_framework import fields, serializers
 from django.contrib.auth import authenticate
 
 from NanoPayApp import models
 
+class UserSerializer(serializers.ModelSerializer):
+     
+    class Meta :
+        model = models.UserProfile
+        fields = ('id', 'phone', "password")
+        
+        extra_kwargs = {
+            'password' : {
+                'write_only' : True,
+                'style' : {
+                    'input_type' : 'password'
+                }
+            }, 
+        }
+    def create(self, validated_data):
+        """create the return new user"""
+        
+
+        user = models.UserProfile.objects.create_user(
+            phone =  validated_data['phone'],
+            password = validated_data['password']
+        )
+
+        return user
+         
+class UserInfoSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model = models.UserProfile
+        fields = ('id', 'phone', 'nom', 'prenom', 'dateDeNaissance',
+                  'genre')
+        
+
+
+class UserLoginSerializer(serializers.Serializer):
+    model = models.UserProfile
+
+    """
+    """
+
+
+      
       
 class UserProfileSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
@@ -134,4 +176,5 @@ class AuthTokenSerializer(serializers.Serializer):
         attrs['user'] = user
 
         return attrs
+    
         

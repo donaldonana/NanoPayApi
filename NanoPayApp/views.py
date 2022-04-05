@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import mixins
 from rest_framework import generics
+from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,10 +23,82 @@ from rest_framework.permissions import (
     DjangoModelPermissions,
 )
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from django.contrib.auth import authenticate
+
 
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
 #from NanoPayApp.models import *
+
+
+
+class UserCreateView(generics.CreateAPIView):
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserSerializer
+    
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    #mixins.CreateModelMixin
+class UserInfoView(generics.CreateAPIView):
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserInfoSerializer
+    
+    def get_user(self, phone):
+        try:
+            return models.UserProfile.objects.get(phone = phone)
+        except models.UserProfile.DoesNotExist:
+            return HttpResponseBadRequest(status=status.HTTP_404_NOT_FOUND)
+        
+    def create(self, request, *args, **kwargs):
+        
+        phone = request.data["phone"]
+        user = get_object_or_404(models.UserProfile ,phone = phone)  
+        serializer = self.get_serializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        
+        
+        return Response(serializer.data)
+        
+        
+
+class UserLoginView(generics.ListAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserLoginSerializer
+    
+    def list(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        password = self.kwargs["password"]
+        phone = self.kwargs["telephone"]
+        user = authenticate(request, username = phone , password = password)
+        
+        if (not user):
+            
+            reponse = {"detail": "Unable to authenticate with provided credentials"}
+            
+            return Response(
+                        reponse,
+                        status=status.HTTP_404_NOT_FOUND,   
+                    )
+        
+        return Response(
+            data = {"id": user.id,
+                    "telephone": user.phone,
+                    "nom": user.nom,
+                    "prenom": user.prenom,
+                    "dateDeNaissance": user.dateDeNaissance,
+                    "genre": user.genre
+                    }
+        )
+          
+            
+
+
+
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -53,7 +126,7 @@ class UserList(generics.ListAPIView):
         This view should return a list of all the purchases for
         the user as determined by the username portion of the URL.
         """
-        phone = int(self.kwargs['telephone'])
+        phone = self.kwargs['telephone']
         return models.UserProfile.objects.filter(phone=phone)
         
 class CustomAuthToken(ObtainAuthToken, CreateAPIView):

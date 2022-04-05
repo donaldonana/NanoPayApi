@@ -8,14 +8,26 @@ from NanoPayApp import views
 
 router = DefaultRouter()
 router.register('UserProfile', views.UserProfileViewSet)
+<<<<<<< HEAD
+# router.register('Compte', views.CompteViewSet)
+# router.register('Transaction', views.TransactionViewSet)
+# router.register('ParametreCarte', views.ParametreCarteViewSet)
+=======
 #router.register('Compte', views.CompteViewSet)
 #router.register('Transaction', views.TransactionViewSet)
 #router.register('ParametreCarte', views.ParametreCarteViewSet)
+>>>>>>> 920db4667ca19caac7dcd64945aab3857da20435
 
 
 
 urlpatterns = [
 
+<<<<<<< HEAD
+    path('', include(router.urls)),
+    path("login/", views.CustomAuthToken.as_view()),
+    # path("change-password/", views.ChangePasswordView.as_view()),
+    path("logout/", views.Logout.as_view()),
+=======
     #path('', include(router.urls)),
     #path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
@@ -27,6 +39,7 @@ urlpatterns = [
     
     #path("change-password/", views.ChangePasswordView.as_view()),
     #path("logout/", views.Logout.as_view()), UserInfoView
+>>>>>>> 920db4667ca19caac7dcd64945aab3857da20435
     #path('user/{tlephone}/', views.PurchaseList.as_view()),
     #url(r'^user/(?P<telephone>\d+)/$', views.UserList.as_view()),
 

@@ -8,8 +8,8 @@ import json
 # print(r.text)
 # print('----------------')
 
-data = {"username" : "000",
-		"password" : "000"}
+data = {
+		"password" : "0123"}
 
 
 
@@ -19,11 +19,11 @@ data = {"username" : "000",
 # r = requests.post("http://127.0.0.1:8000/api/UserProfile/" ,  data=multipart_data,
 #                   headers={'Content-Type': multipart_data.content_type})
 
-r = requests.post("http://127.0.0.1:8001/api/api-token-auth/" ,  data = data)
+r = requests.post("http://127.0.0.1:8000/api/user/0123/" ,  data = data)
 
 print(r.status_code)
 print('----------------')
 print(r.text)
 print('----------------')
-print(r.headers)
+#print(r.headers)
 print('----------------')

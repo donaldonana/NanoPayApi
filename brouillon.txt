@@ -22,3 +22,13 @@ A request body can only contain files when it has the multipart content type. Yo
 DATABASE_URL
 
 django.db.backends.
+
+
+
+
+
+
+pos = list(response.keys()).index('id')
+        items = list(response.items())
+        items.insert(pos+1, ('telephone',  user.phone))
+        response = dict(items)
