@@ -7,7 +7,8 @@ class UserSerializer(serializers.ModelSerializer):
      
     class Meta :
         model = models.UserProfile
-        fields = ('id', 'phone', "password")
+        fields = ('id', 'phone', "code", "password")
+        read_only_fields = ('code',)
         
         extra_kwargs = {
             'password' : {
@@ -16,14 +17,21 @@ class UserSerializer(serializers.ModelSerializer):
                     'input_type' : 'password'
                 }
             }, 
+
+             'code' : {
+                'read_only' : True,
+            
+            },
         }
     def create(self, validated_data):
         """create the return new user"""
         
+        code = "12356"
 
         user = models.UserProfile.objects.create_user(
             phone =  validated_data['phone'],
-            password = validated_data['password']
+            password = validated_data['password'],
+            code = code
         )
 
         return user
@@ -63,7 +71,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = models.UserProfile
-        fields = ('id', 'phone', 'email', 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
+        fields = ('id', 'phone', 'email', 'code', 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
                   'is_staff', 'genre')
         extra_kwargs = {
             'password' : {

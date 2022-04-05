@@ -15,6 +15,7 @@ class UserProfileManager(BaseUserManager):
     def create_user(self, 
         phone, 
         password ,
+        code,
         nom = None,
         email = None,
         genre = None,
@@ -28,6 +29,7 @@ class UserProfileManager(BaseUserManager):
        # email = self.normalize_email(email)
         user = self.model(
             nom = nom , 
+            code = code,
             phone = phone, 
             email = email,
             genre = genre,
@@ -42,6 +44,7 @@ class UserProfileManager(BaseUserManager):
     def create_superuser(self, 
         phone, 
         password ,
+        code,
         nom = None,
         email = None,
         genre = None,
@@ -49,6 +52,7 @@ class UserProfileManager(BaseUserManager):
         dateDeNaissance = None,):
         """create and save superuser with given detail"""
         user = self.create_user(nom = nom , 
+            code = code,
             phone = phone, 
             email = email,
             genre = genre,
@@ -82,6 +86,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=255, unique=True, blank = True, null= True)
     nom = models.CharField(max_length=255, blank = True, null= True)
+    code = models.CharField(max_length=20, blank = True, null= True)
     prenom = models.CharField(max_length=255, null= True, blank = True)
     phone = models.CharField(max_length=255, unique=True)
     dateDeNaissance = models.DateField(blank = True, null = True)

@@ -16,7 +16,7 @@ router.register('UserProfile', views.UserProfileViewSet)
 
 urlpatterns = [
 
-    #path('', include(router.urls)),
+    path('', include(router.urls)),
     #path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
     path('user/info/', views.UserInfoView.as_view(), name= 'UserInfo'),
