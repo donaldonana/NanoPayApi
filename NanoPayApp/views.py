@@ -103,14 +103,16 @@ class UserLoginView(generics.ListAPIView):
                         reponse,
                         status=status.HTTP_404_NOT_FOUND,   
                     )
-        
+        comptes = user.compte_set.all()
+        comptes = serializers.CompteSerializer(comptes, many = True)
         return Response(
             data = {"id": user.id,
                     "telephone": user.phone,
                     "nom": user.nom,
                     "prenom": user.prenom,
                     "dateDeNaissance": user.dateDeNaissance,
-                    "genre": user.genre
+                    "genre": user.genre,
+                    "comptes": comptes.data
                     }
         )
           
