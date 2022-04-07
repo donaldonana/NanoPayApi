@@ -24,11 +24,9 @@ from rest_framework.permissions import (
 )
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.contrib.auth import authenticate
-
-
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
-#from NanoPayApp.models import *
+
 
 
 
@@ -38,7 +36,25 @@ class UserCreateView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+class UserCodeCreateView(generics.CreateAPIView):    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserCodeSerializer
     
+    def create(self, request, *args, **kwargs):
+        phone = request.data["phone"]
+        code = request.data["code"]
+        user = get_object_or_404(models.UserProfile ,phone = phone, code = code)
+        user.valide = True
+        user.save()  
+        serializer = self.get_serializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        response = {"code" : serializer.data["code"],
+                    "message" : "your Acount is successfuly activate"}
+        return Response(response)
+        
+
+
     #mixins.CreateModelMixin
 class UserInfoView(generics.CreateAPIView):
     parser_classes = (MultiPartParser,FormParser) 
@@ -57,10 +73,13 @@ class UserInfoView(generics.CreateAPIView):
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        comptes = user.compte_set.all()
+        comptes = serializers.CompteSerializer(comptes, many = True)
+        response = serializer.data
+        response["compte"] = comptes.data
         
         
-        
-        return Response(serializer.data)
+        return Response(response)
         
         
 
@@ -97,6 +116,44 @@ class UserLoginView(generics.ListAPIView):
           
             
 
+class CompteCreateView(generics.CreateAPIView):
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.CreateCompteSerializer
+    
+    def create(self, request, *args, **kwargs):
+        phone = request.data["telephone"]
+        user = get_object_or_404(models.UserProfile ,phone = phone)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        num_compte = len(user.compte_set.all())
+        if num_compte >= 10:
+            response = {"status" : "Bad request", 
+                        "message" : "This user already have most than 10 Account"}
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        
+        else :
+            
+            c = models.Compte(user = user)
+            c.nomCompte = serializer.data.get("nomCompte")
+            num_compte = num_compte + 1
+            if num_compte == 10:   
+                c.numCompte = user.phone +"-"+str(num_compte)
+            else:
+                c.numCompte = user.phone +"-0"+str(num_compte)
+            c.type = serializer.data.get("type")
+            c.principal = False
+            c.save()
+            response = {"code": "1234"}
+            
+            return Response(response,)
+
+
+
+
+
+
+#################################################################
 
 
 
