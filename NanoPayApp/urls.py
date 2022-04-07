@@ -20,6 +20,9 @@ urlpatterns = [
     #path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
     path('user/info/', views.UserInfoView.as_view(), name= 'UserInfo'),
+    path('user/compte/', views.CompteCreateView.as_view(), name= 'UserCompte'),
+    path('user/code/', views.UserCodeCreateView.as_view(), name= 'UserCode'),
+
     path('user/conexion/<telephone>/<password>', views.UserLoginView.as_view(), name= 'UserLogin'),
     #url(r'^user/(?P<telephone>\d+)/$', views.UserLoginView.as_view(), name= 'UserLogin'),
     

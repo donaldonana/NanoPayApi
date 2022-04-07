@@ -44,7 +44,7 @@ class UserProfileManager(BaseUserManager):
     def create_superuser(self, 
         phone, 
         password ,
-        code,
+        code = None,
         nom = None,
         email = None,
         genre = None,
@@ -65,6 +65,20 @@ class UserProfileManager(BaseUserManager):
 
         user.save(using=self._db)
         return user
+    
+    def CreateDefaultCompte(self, user):
+        
+        if len(user.compte_set.all()) == 0:
+            c1 = Compte(user = user)
+            c1.numCompte = user.phone + '-01'
+            c1.nomCompte = user.get_full_name()
+            c1.save()
+            user.compte_set.add(c1)
+            user.save()
+    
+    def UpdateCompte(self, user):
+        c = user.compte_set.get(user_id = user.id)
+        c.nomCompte = user.get_full_name()
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -91,6 +105,11 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=255, unique=True)
     dateDeNaissance = models.DateField(blank = True, null = True)
     genre = models.CharField(max_length=25, choices=Genre, blank = True, null= True)
+    valide = models.BooleanField(default=False)
+    comptes  = models.ManyToManyField('Compte', 
+        symmetrical = False , 
+        related_name = "comptes", 
+        blank = True)
     
     
     # abonnes   = models.ForeignKey('self', related_name = "abonne", on_delete=models.CASCADE, null = True)
@@ -105,31 +124,36 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def get_last_name(self):
-
         return self.nom
+    
+    def get_full_name(self):
+        
+        if self.nom and self.prenom:
+            return self.nom + " " + self.prenom
+        else:
+            return
     
 
 class Compte(models.Model):
     
     TYPE = (
     ('entrprise', 'Entreprise'),
-    ('personel', 'Personel')
+    ('personel', 'Personel'),
+    ('depense', 'depense')
+    
     ) 
     
-    numCompte = models.IntegerField(unique=True)
-    nomCompte = models.CharField(max_length=25,blank=True)
-    principal  = models.BooleanField()
-    solde = models.IntegerField()
-    type = models.CharField(max_length=25, choices=TYPE)
+    numCompte = models.CharField(max_length = 25 , default="le nom du compte")
+    nomCompte = models.CharField(max_length=25, blank=True, null = True)
+    principal  = models.BooleanField(default=True)
+    solde = models.IntegerField(default=0)
+    type = models.CharField(max_length=25, blank=True, null=True)  
     dateCreation = models.DateTimeField(default = timezone.now)
     user = models.ForeignKey(
         'UserProfile',
         on_delete=models.CASCADE,
     )
-    params = models.ForeignKey(
-        'ParametreCarte',
-        on_delete=models.CASCADE,
-    )
+    
     
     
 class Transaction(models.Model):

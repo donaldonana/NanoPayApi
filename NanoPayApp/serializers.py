@@ -30,13 +30,27 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         return user
-         
+    
+
+class UserCodeSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model = models.UserProfile
+        fields = ('phone', 'code')
+   
 class UserInfoSerializer(serializers.ModelSerializer):
     
     class Meta :
         model = models.UserProfile
         fields = ('id', 'phone', 'nom', 'prenom', 'dateDeNaissance',
                   'genre')
+        
+        
+    
+    def update(self, instance, validated_data):
+        models.UserProfile.objects.CreateDefaultCompte(instance)
+        #models.UserProfile.objects.UpdateCompte(instance)
+        return super().update(instance, validated_data)
         
 
 
@@ -45,8 +59,34 @@ class UserLoginSerializer(serializers.Serializer):
 
     """
     """
+    
+class CreateCompteSerializer(serializers.Serializer):
+    
+    TYPE = (
+    ('entrprise', 'Entreprise'),
+    ('personel', 'Personel'),
+    ('depense', 'depense')
+    
+    ) 
+    telephone = serializers.CharField(max_length = 25 )
+    nomCompte = serializers.CharField()
+    type = serializers.CharField(max_length=25)
 
+class CompteSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+            
 
+    class Meta:
+        
+        model = models.Compte
+        fields = '__all__'
+        
+        extra_kwargs = {
+            'user' : {
+                'read_only' : True,
+                
+            }, 
+        }
       
       
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -66,7 +106,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = models.UserProfile
-        fields = ('id', 'phone', 'email', 'code', 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
+        fields = ('id', 'phone', 'email', 'code', 'valide' , 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
                   'is_staff', 'genre')
         extra_kwargs = {
             'password' : {
@@ -114,21 +154,7 @@ class CustomAuthTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
 
-class CompteSerializer(serializers.ModelSerializer):
-    """Serializer the user profile object"""
-            
 
-    class Meta:
-        
-        model = models.Compte
-        fields = '__all__'
-        
-        extra_kwargs = {
-            'user' : {
-                'read_only' : True,
-                
-            }, 
-        }
         
 class TransactionSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
