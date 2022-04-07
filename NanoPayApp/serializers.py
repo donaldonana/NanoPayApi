@@ -17,11 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
                     'input_type' : 'password'
                 }
             }, 
-
-             'code' : {
-                'read_only' : True,
-            
-            },
         }
     def create(self, validated_data):
         """create the return new user"""
