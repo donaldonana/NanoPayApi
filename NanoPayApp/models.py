@@ -72,6 +72,9 @@ class UserProfileManager(BaseUserManager):
             c1 = Compte(user = user)
             c1.numCompte = user.phone + '-01'
             c1.nomCompte = user.get_full_name()
+            params = ParametreCarte()
+            params.save()
+            c1.parametre = params
             c1.save()
             user.compte_set.add(c1)
             user.save()
@@ -143,18 +146,34 @@ class Compte(models.Model):
     
     ) 
     
-    numCompte = models.CharField(max_length = 25 , default="le nom du compte")
+    numCompte = models.CharField(max_length = 25 , default="123")
     nomCompte = models.CharField(max_length=25, blank=True, null = True)
     principal  = models.BooleanField(default=True)
     solde = models.IntegerField(default=0)
-    type = models.CharField(max_length=25, blank=True, null=True)  
+    type = models.CharField(max_length=25, default="depense")  
     dateCreation = models.DateTimeField(default = timezone.now)
     user = models.ForeignKey(
         'UserProfile',
         on_delete=models.CASCADE,
     )
+    parametre = models.ForeignKey(
+        'ParametreCarte',
+        on_delete=models.CASCADE,
+        blank=True, null = True
+    )
+    permissions = models.ManyToManyField('UserProfile', 
+        related_name = "perimissions", 
+        blank = True, null=True)
     
     
+class ParametreCarte(models.Model):
+     
+    active = models.BooleanField(default=True)
+    PaiementQuotidientLimite = models.IntegerField(default=10000)
+    MontantPaimentQuotidient = models.IntegerField(default=10)
+    confirmationEnAttente = models.IntegerField(default=0)
+    
+#-------------------------------------------------------------------------------------
     
 class Transaction(models.Model):
     
@@ -171,7 +190,3 @@ class Transaction(models.Model):
         on_delete=models.CASCADE,
     )
     
-class ParametreCarte(models.Model):
-    paiementVerouiller = models.BooleanField()
-    PaiementQuotidientLimite = models.IntegerField()
-    MontantPaimentQuotidient = models.IntegerField()

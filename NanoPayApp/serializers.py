@@ -59,7 +59,19 @@ class UserLoginSerializer(serializers.Serializer):
 
     """
     """
-    
+
+
+
+class ParametreCarteSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+            
+
+    class Meta:
+        
+        model = models.ParametreCarte
+        fields = '__all__'
+
+
 class CreateCompteSerializer(serializers.Serializer):
     
     TYPE = (
@@ -71,15 +83,18 @@ class CreateCompteSerializer(serializers.Serializer):
     telephone = serializers.CharField(max_length = 25 )
     nomCompte = serializers.CharField()
     type = serializers.CharField(max_length=25)
+    
 
 class CompteSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
-
+    parametre = ParametreCarteSerializer(read_only = True)
     class Meta:
         
         model = models.Compte
-        fields = '__all__'
+        fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type',
+                  'dateCreation', 'user', 'parametre', 'permissions')
+        
         
         extra_kwargs = {
             'user' : {
@@ -87,6 +102,13 @@ class CompteSerializer(serializers.ModelSerializer):
                 
             }, 
         }
+      
+class ToggleCompteSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = models.Compte
+        fields = ('numCompte',)         
+      
+#---------------------------------------------------------------      
       
       
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -156,54 +178,6 @@ class CustomAuthTokenSerializer(serializers.Serializer):
 
 
         
-class TransactionSerializer(serializers.ModelSerializer):
-    """Serializer the user profile object"""
-            
 
-    class Meta:
-        
-        model = models.Transaction
-        fields = '__all__'
-        
-        extra_kwargs = {
-            'compteEmetteur' : {
-                'read_only' : True,
-                
-            }, 
-            
-        }
-        
-        
-class ParametreCarteSerializer(serializers.ModelSerializer):
-    """Serializer the user profile object"""
-            
-
-    class Meta:
-        
-        model = models.ParametreCarte
-        fields = '__all__'
-        
-        
-class AuthTokenSerializer(serializers.Serializer):
-    """Serializer for user authentication object"""
-
-    email = serializers.CharField()
-    password = serializers.CharField(style = {'input_type' : 'password' }, trim_whitespace = False)
-
-    def validate(self, attrs):
-        """Validate and authentiate the user"""
-
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        user = authenticate(request = self.context.get('request'), username = email , password = password)
-
-        if not user:
-            msg = ('Unable to authenticate with provided credentials.')
-            raise serializers.ValidationError(msg, code='authorization')
-
-        attrs['user'] = user
-
-        return attrs
     
         

@@ -1,3 +1,4 @@
+from ast import For
 from email import message
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest
@@ -36,6 +37,7 @@ class UserCreateView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
 
 class UserCodeCreateView(generics.CreateAPIView):    
     parser_classes = (MultiPartParser,FormParser) 
@@ -144,15 +146,53 @@ class CompteCreateView(generics.CreateAPIView):
             else:
                 c.numCompte = user.phone +"-0"+str(num_compte)
             c.type = serializer.data.get("type")
+            if c.type in ["depense",]:
+                params = models.ParametreCarte()
+                params.save()               
+                c.parametre = params
             c.principal = False
             c.save()
-            response = {"code": "1234"}
+            response = {"code":  status.HTTP_200_OK,
+                        "message" : "Succesful create Account"}
             
             return Response(response,)
 
+class UserComptesView(generics.ListAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.CompteSerializer
+    def get_queryset(self):
+        phone = self.kwargs["telephone"]
+        user = get_object_or_404(models.UserProfile ,phone = phone)
+        return user.compte_set.all()
+    
+class RetrieveComptesView(generics.RetrieveAPIView):
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.CompteSerializer
+    lookup_field = "numCompte"
+    def get_object(self):
+        compte = get_object_or_404(models.Compte ,numCompte = self.kwargs["numCompte"])
+        return compte
 
 
-
+class ToggleCompteView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.ToggleCompteSerializer
+    
+    def create(self, request, *args, **kwargs):
+        
+        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        p = c.parametre
+        if p.active == True :
+            p.active = False
+        else: 
+            p.active = True
+        p.save()
+        c.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "Carte was toggle succesfuly"})
 
 
 #################################################################
@@ -276,23 +316,6 @@ class CompteViewSet(viewsets.ModelViewSet):
 
         serializer.save(user=self.request.user)
         
-        
-class TransactionViewSet(viewsets.ModelViewSet):
-    """Handle creating and updating user profile"""
-    serializer_class = serializers.TransactionSerializer
-    queryset = models.Transaction.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ('dateHeure',)
-    filterset_fields = ('compteEmetteur__nom',)
-    ordering_fields = ('dateHeure', 'id',)
-    parser_classes = (MultiPartParser,FormParser)
-    
-    def perform_create(self, serializer):
-        """Sets the user profile to the logged in user"""
-
-        serializer.save(compteEmetteur=self.request.user)
         
         
 class ParametreCarteViewSet(viewsets.ModelViewSet):

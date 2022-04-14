@@ -32,3 +32,53 @@ pos = list(response.keys()).index('id')
         items = list(response.items())
         items.insert(pos+1, ('telephone',  user.phone))
         response = dict(items)
+
+
+
+              
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        if self.context["request"].method == "PUT":
+            self.fields.pop("password")
+            self.fields.pop("phone")
+        if "data" in kwargs.keys():  
+            self.f = kwargs["data"]
+            
+            
+
+    class Meta:
+
+        model = models.UserProfile
+        fields = ('id', 'phone', 'email', 'code', 'valide' , 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
+                  'is_staff', 'genre')
+        extra_kwargs = {
+            'password' : {
+                'write_only' : True,
+                'style' : {
+                    'input_type' : 'password'
+                }
+            }, 
+        }
+        
+    def create(self, validated_data):
+        """create the return new user"""
+        if self.f is not None:
+            allowed = set(self.f.keys())
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                validated_data[field_name] = None
+
+        user = models.UserProfile.objects.create_user(
+            email =  validated_data['email'],
+            nom =  validated_data['nom'],
+            phone =  validated_data['phone'],
+            prenom = validated_data['prenom'],
+            dateDeNaissance = validated_data['dateDeNaissance'],
+            password = validated_data['password']
+        )
+
+        return user
