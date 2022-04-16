@@ -106,7 +106,12 @@ class CompteSerializer(serializers.ModelSerializer):
 class ToggleCompteSerializer(serializers.ModelSerializer):    
     class Meta:
         model = models.Compte
-        fields = ('numCompte',)         
+        fields = ('numCompte',)  
+        extra_kwargs = {'numCompte': {'required': True}}    
+
+
+
+
       
 #---------------------------------------------------------------      
       
