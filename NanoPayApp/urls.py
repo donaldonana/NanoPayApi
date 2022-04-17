@@ -23,10 +23,20 @@ urlpatterns = [
     path('user/compte/', views.CompteCreateView.as_view(), name= 'UserCompte'),
     path('user/code/', views.UserCodeCreateView.as_view(), name= 'UserCode'),
     path('user/compte/carte/toggle/', views.ToggleCompteView.as_view(), name= 'ToggleCarte'),
+    path('user/compte/carte/limite/', views.QuotidientLimiteView.as_view()),
+    path('user/compte/carte/plafond/', views.PaimentQuotidientView.as_view()),
+    path('user/compte/permission/add/', views.AddPermissionView.as_view()),
+    path('user/compte/permission/remove/', views.RemovePermissionView.as_view()),
+    
+    
+    
+    
 
     path('user/conexion/<telephone>/<password>', views.UserLoginView.as_view(), name= 'UserLogin'),
     #path('user/compte/<telephone>', views.UserComptesView.as_view(), name= 'UserComptes'),
     path('user/compte/<numCompte>', views.RetrieveComptesView.as_view(), name= 'Compte'),
+    path('user/compte/permission/<numCompte>', views.PermissionsListView.as_view()),
+    
     
     #url(r'^user/(?P<telephone>\d+)/$', views.UserLoginView.as_view(), name= 'UserLogin'),
     

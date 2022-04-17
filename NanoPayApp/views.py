@@ -195,6 +195,90 @@ class ToggleCompteView(generics.CreateAPIView):
                          "message": "Carte was toggle succesfuly"})
 
 
+class QuotidientLimiteView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.QuotidientLimiteSerializer
+    
+    def create(self, request, *args, **kwargs):
+        
+        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        p = c.parametre
+        p.PaiementQuotidientLimite = request.data["valeurLimite"]
+        p.save()
+        c.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "Paiement Quotidient Limite was set succesfuly"})
+        
+class PaimentQuotidientView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.PlafondLimiteSerializer
+    
+    def create(self, request, *args, **kwargs):
+        
+        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        p = c.parametre
+        p.PaimentQuotidient = request.data["valeurPlafond"]
+        p.save()
+        c.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "Montant limite was set succesfuly"})
+        
+
+class AddPermissionView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.PermissionsChangeSerializer
+    
+    def create(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
+        user = get_object_or_404(models.UserProfile ,phone = request.data["TelephoneUser"])  
+        
+        c.permissions.add(user)
+        
+        c.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "User was successfuly added"})
+        
+        
+class RemovePermissionView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.PermissionsChangeSerializer
+    
+    def create(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
+        user = get_object_or_404(models.UserProfile ,phone = request.data["TelephoneUser"])  
+        
+        c.permissions.remove(user)
+        
+        c.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "User was successfuly removed"})
+        
+        
+class PermissionsListView(generics.ListAPIView):
+    
+    serializer_class = serializers.PermissionsSerializer
+    
+    def get_queryset(self):
+        numCompte = self.kwargs["numCompte"]
+        compte = get_object_or_404(models.Compte ,numCompte = numCompte)
+        return compte.permissions.all()
+        
+        
+
 #################################################################
 
 
@@ -316,7 +400,7 @@ class CompteViewSet(viewsets.ModelViewSet):
 
         serializer.save(user=self.request.user)
         
-        
+    
         
 class ParametreCarteViewSet(viewsets.ModelViewSet):
     """Handle creating and updating user profile"""

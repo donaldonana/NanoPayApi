@@ -59,17 +59,8 @@ class UserLoginSerializer(serializers.Serializer):
 
     """
     """
+    
 
-
-
-class ParametreCarteSerializer(serializers.ModelSerializer):
-    """Serializer the user profile object"""
-            
-
-    class Meta:
-        
-        model = models.ParametreCarte
-        fields = '__all__'
 
 
 class CreateCompteSerializer(serializers.Serializer):
@@ -85,10 +76,27 @@ class CreateCompteSerializer(serializers.Serializer):
     type = serializers.CharField(max_length=25)
     
 
+class ParametreCarteSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+            
+    class Meta:
+        
+        model = models.ParametreCarte
+        fields = '__all__'
+        
+class PermissionsSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+            
+    class Meta:
+        model = models.UserProfile
+        fields = ('nom', 'phone')
+        
 class CompteSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
     parametre = ParametreCarteSerializer(read_only = True)
+    permissions = PermissionsSerializer(read_only = True, many = True)
+    
     class Meta:
         
         model = models.Compte
@@ -108,7 +116,25 @@ class ToggleCompteSerializer(serializers.ModelSerializer):
         model = models.Compte
         fields = ('numCompte',)  
         extra_kwargs = {'numCompte': {'required': True}}    
+        
+class QuotidientLimiteSerializer(serializers.ModelSerializer): 
+    valeurLimite = serializers.IntegerField()
+    class Meta:
+        model = models.Compte
+        fields = ('numCompte','valeurLimite')  
+        extra_kwargs = {'numCompte': {'required': True}}  
+        
+class PlafondLimiteSerializer(serializers.ModelSerializer): 
+    valeurPlafond = serializers.IntegerField()
+    class Meta:
+        model = models.Compte
+        fields = ('numCompte','valeurPlafond')  
+        extra_kwargs = {'numCompte': {'required': True}}  
 
+class PermissionsChangeSerializer(serializers.Serializer):
+    
+    TelephoneUser = serializers.CharField(max_length = 25 )
+    NumCompte = serializers.CharField()
 
 
 
