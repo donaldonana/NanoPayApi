@@ -121,7 +121,7 @@ class UserLoginView(generics.ListAPIView):
                     }
         )
           
-            
+           
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
                                     operation_description="hello world",
                                     operation_summary="hello world"))
@@ -167,10 +167,10 @@ class CompteCreateView(generics.CreateAPIView):
             
             return Response(response,)
 
+
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
-                                    operation_id= "22",
-                                    operation_description="hello world",
-                                    operation_summary="hello world 22"))
+                    operation_id= "Get_all_user_Account",
+                    operation_summary="renvoie la liste des comptes d'un utilisateur"))
 class UserComptesView(generics.ListAPIView):
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.CompteSerializer
@@ -178,6 +178,7 @@ class UserComptesView(generics.ListAPIView):
         phone = self.kwargs["telephone"]
         user = get_object_or_404(models.UserProfile ,phone = phone)
         return user.compte_set.all()
+
     
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte']))   
 class RetrieveComptesView(generics.RetrieveAPIView):
@@ -187,6 +188,7 @@ class RetrieveComptesView(generics.RetrieveAPIView):
     def get_object(self):
         compte = get_object_or_404(models.Compte ,numCompte = self.kwargs["numCompte"])
         return compte
+
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))   
 class ToggleCompteView(generics.CreateAPIView):
@@ -242,6 +244,7 @@ class PaimentQuotidientView(generics.CreateAPIView):
         
         return Response({"code": status.HTTP_201_CREATED, 
                          "message": "Montant limite was set succesfuly"})
+
         
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))
 class AddPermissionView(generics.CreateAPIView):
@@ -283,6 +286,7 @@ class RemovePermissionView(generics.CreateAPIView):
         
         return Response({"code": status.HTTP_201_CREATED, 
                          "message": "User was successfuly removed"})
+
         
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte']))    
 class PermissionsListView(generics.ListAPIView):
@@ -293,8 +297,30 @@ class PermissionsListView(generics.ListAPIView):
         numCompte = self.kwargs["numCompte"]
         compte = get_object_or_404(models.Compte ,numCompte = numCompte)
         return compte.permissions.all()
+
+
+
+
+
+class ContactRetreiveView(generics.ListAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.UserLoginSerializer
+    def list(self, request, *args, **kwargs):
         
-        
+        user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])  
+        comptes = user.compte_set.all()
+        comptes = serializers.CompteSerializer(comptes, many = True)
+        return Response({
+                    "nom": user.nom,
+                    "telephone": user.phone,
+                    "comptes": comptes.data
+                    }
+        )
+
+
+
+    
 
 #################################################################
 

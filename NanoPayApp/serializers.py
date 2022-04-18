@@ -137,7 +137,10 @@ class PermissionsChangeSerializer(serializers.Serializer):
     NumCompte = serializers.CharField()
 
 
-
+class ContactSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserProfile
+        fields = ( 'nom', 'phone')
       
 #---------------------------------------------------------------      
       

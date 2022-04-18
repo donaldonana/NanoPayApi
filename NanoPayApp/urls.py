@@ -35,6 +35,8 @@ urlpatterns = [
 
     path('user/conexion/<telephone>/<password>', views.UserLoginView.as_view()),
     path('user/compte/<telephone>', views.UserComptesView.as_view(), name= 'UserComptes'),
+    path('contact/<telephone>', views.ContactRetreiveView.as_view()),
+    
     path('user/compte/<numCompte>', views.RetrieveComptesView.as_view(), name= 'Compte'),
     path('user/compte/permission/<numCompte>', views.PermissionsListView.as_view()),
     

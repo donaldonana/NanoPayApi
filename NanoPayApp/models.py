@@ -113,6 +113,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         symmetrical = False , 
         related_name = "comptes", 
         blank = True)
+    contacts  = models.ManyToManyField('self', 
+        symmetrical = False , 
+        related_name = "contact", 
+        blank = True)
     
     
     # abonnes   = models.ForeignKey('self', related_name = "abonne", on_delete=models.CASCADE, null = True)
