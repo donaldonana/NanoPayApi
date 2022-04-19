@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from django.conf.urls import  url
 
 from NanoPayApp import views
+from drf_yasg import openapi
 
 
 router = DefaultRouter()
@@ -27,14 +28,21 @@ urlpatterns = [
     path('user/compte/carte/plafond/', views.PaimentQuotidientView.as_view()),
     path('user/compte/permission/add/', views.AddPermissionView.as_view()),
     path('user/compte/permission/remove/', views.RemovePermissionView.as_view()),
+    path('contact/add/', views.AddContactView.as_view()),
+    path('contact/remove/', views.RemoveContactView.as_view()),
+    
+    
     
     
     
     
 
     path('user/conexion/<telephone>/<password>', views.UserLoginView.as_view()),
-    #path('user/compte/<telephone>', views.UserComptesView.as_view(), name= 'UserComptes'),
-    path('user/compte/<numCompte>', views.RetrieveComptesView.as_view(), name= 'Compte'),
+    path('user/compte/<telephone>', views.UserComptesView.as_view(), name= 'UserComptes'),
+    path('contact/<telephone>', views.ContactRetreiveView.as_view()),
+    path('contact/list/<telephone>', views.ContactListView.as_view()),
+    
+    path('user/compte/info/<numCompte>', views.RetrieveComptesView.as_view()),
     path('user/compte/permission/<numCompte>', views.PermissionsListView.as_view()),
     
     
