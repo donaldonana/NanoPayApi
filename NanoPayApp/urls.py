@@ -7,7 +7,7 @@ from NanoPayApp import views
 
 
 router = DefaultRouter()
-router.register('UserProfile', views.UserProfileViewSet)
+#router.register('UserProfile', views.UserProfileViewSet)
 #router.register('Compte', views.CompteViewSet)
 #router.register('Transaction', views.TransactionViewSet)
 #router.register('ParametreCarte', views.ParametreCarteViewSet)
