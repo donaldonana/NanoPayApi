@@ -109,10 +109,6 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     dateDeNaissance = models.DateField(blank = True, null = True)
     genre = models.CharField(max_length=25, choices=Genre, blank = True, null= True)
     valide = models.BooleanField(default=False)
-    comptes  = models.ManyToManyField('Compte', 
-        symmetrical = False , 
-        related_name = "comptes", 
-        blank = True)
     contacts  = models.ManyToManyField('self', 
         symmetrical = False , 
         related_name = "contact", 
@@ -166,7 +162,7 @@ class Compte(models.Model):
         blank=True, null = True
     )
     permissions = models.ManyToManyField('UserProfile', 
-        related_name = "perimissions", 
+        related_name = "permissions", 
         blank = True, null=True)
     
     

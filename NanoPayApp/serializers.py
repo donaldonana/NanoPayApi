@@ -83,6 +83,7 @@ class ParametreCarteSerializer(serializers.ModelSerializer):
         
         model = models.ParametreCarte
         fields = '__all__'
+
         
 class PermissionsSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
@@ -90,6 +91,7 @@ class PermissionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserProfile
         fields = ('nom', 'phone')
+
         
 class CompteSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
@@ -110,12 +112,14 @@ class CompteSerializer(serializers.ModelSerializer):
                 
             }, 
         }
+
       
 class ToggleCompteSerializer(serializers.ModelSerializer):    
     class Meta:
         model = models.Compte
         fields = ('numCompte',)  
         extra_kwargs = {'numCompte': {'required': True}}    
+
         
 class QuotidientLimiteSerializer(serializers.ModelSerializer): 
     valeurLimite = serializers.IntegerField()
@@ -123,6 +127,7 @@ class QuotidientLimiteSerializer(serializers.ModelSerializer):
         model = models.Compte
         fields = ('numCompte','valeurLimite')  
         extra_kwargs = {'numCompte': {'required': True}}  
+
         
 class PlafondLimiteSerializer(serializers.ModelSerializer): 
     valeurPlafond = serializers.IntegerField()
@@ -137,10 +142,19 @@ class PermissionsChangeSerializer(serializers.Serializer):
     NumCompte = serializers.CharField()
 
 
+class AddContactSerializers(serializers.Serializer):
+    
+    telephoneUser = serializers.CharField(max_length = 25)
+    telephoneContact = serializers.CharField(max_length = 25)
+    
+    
 class ContactSerializers(serializers.ModelSerializer):
+    
+    comptes = CompteSerializer( source = "compte_set", read_only = True, many = True)
+    
     class Meta:
         model = models.UserProfile
-        fields = ( 'nom', 'phone')
+        fields = ("phone", "nom", "comptes")
       
 #---------------------------------------------------------------      
       

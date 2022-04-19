@@ -123,8 +123,7 @@ class UserLoginView(generics.ListAPIView):
           
            
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
-                                    operation_description="hello world",
-                                    operation_summary="hello world"))
+                                    operation_summary="Créer Un compte supplémentaire"))
 class CompteCreateView(generics.CreateAPIView):
     """
     parameters:
@@ -180,7 +179,8 @@ class UserComptesView(generics.ListAPIView):
         return user.compte_set.all()
 
     
-@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte']))   
+@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
+                        operation_summary="Renvoie les informations lié à un compte"))   
 class RetrieveComptesView(generics.RetrieveAPIView):
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.CompteSerializer
@@ -190,7 +190,8 @@ class RetrieveComptesView(generics.RetrieveAPIView):
         return compte
 
 
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))   
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
+                        operation_summary="permet d’activé/desactive une carte"))   
 class ToggleCompteView(generics.CreateAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
@@ -210,7 +211,9 @@ class ToggleCompteView(generics.CreateAPIView):
         return Response({"code": status.HTTP_201_CREATED, 
                          "message": "Carte was toggle succesfuly"})
 
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))   
+
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
+                    operation_summary=" Permet de modifier la valeur du nombre limite de paiement sans confirmation du compte"))   
 class QuotidientLimiteView(generics.CreateAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
@@ -228,7 +231,8 @@ class QuotidientLimiteView(generics.CreateAPIView):
                          "message": "Paiement Quotidient Limite was set succesfuly"})
  
  
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))          
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
+                    operation_summary="Permet de modifier la valeur du plafond (montant maximal par opération)  de paiement sans confirmation du compte"))          
 class PaimentQuotidientView(generics.CreateAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
@@ -246,7 +250,9 @@ class PaimentQuotidientView(generics.CreateAPIView):
                          "message": "Montant limite was set succesfuly"})
 
         
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
+                operation_summary="Permet d’ajouter un utilisateur dans les autorisations de paiement"))          
+
 class AddPermissionView(generics.CreateAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
@@ -267,7 +273,8 @@ class AddPermissionView(generics.CreateAPIView):
                          "message": "User was successfuly added"})
 
        
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte']))       
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
+                operation_summary="Permet de retirer  un utilisateur dans les autorisations de paiement"))             
 class RemovePermissionView(generics.CreateAPIView):
     
     parser_classes = (MultiPartParser,FormParser) 
@@ -288,7 +295,9 @@ class RemovePermissionView(generics.CreateAPIView):
                          "message": "User was successfuly removed"})
 
         
-@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte']))    
+@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
+                operation_summary="Renvoie la liste des permissions associé à un compte professionnel"))             
+                      
 class PermissionsListView(generics.ListAPIView):
     
     serializer_class = serializers.PermissionsSerializer
@@ -303,12 +312,20 @@ class PermissionsListView(generics.ListAPIView):
 
 
 class ContactRetreiveView(generics.ListAPIView):
-    
+    """_Recherche et renvoie le contact de l'utilisateur chercher accompagné de ses comptes._
+
+    Args:
+        generics (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.UserLoginSerializer
     def list(self, request, *args, **kwargs):
         
-        user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])  
+        user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
+        #if user in   
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
         return Response({
@@ -319,7 +336,52 @@ class ContactRetreiveView(generics.ListAPIView):
         )
 
 
-
+class AddContactView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.AddContactSerializers
+    
+    def create(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(models.UserProfile ,phone = request.data["telephoneUser"])
+        contact = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
+        
+        user.contacts.add(contact)
+        
+        user.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "Contact was successfuly added in User contact list"})
+        
+class RemoveContactView(generics.CreateAPIView):
+    
+    parser_classes = (MultiPartParser,FormParser) 
+    serializer_class = serializers.AddContactSerializers
+    
+    def create(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(models.UserProfile ,phone = request.data["telephoneUser"])
+        contact = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
+        
+        user.contacts.remove(contact)
+        
+        user.save()
+        
+        return Response({"code": status.HTTP_201_CREATED, 
+                         "message": "Contact was successfuly removed in User contact list"})
+    
+        
+class ContactListView(generics.ListAPIView):
+     
+    serializer_class = serializers.ContactSerializers
+    def get_queryset(self):
+        user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
+        return user.contacts.all()
+    
     
 
 #################################################################
