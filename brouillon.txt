@@ -82,3 +82,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+
+
+postgres://ihteernthmihzn:fbbb2bade5dfb5bab5d31f44e1f1aacd5818372a6ba8d41714726bc5a658523d@ec2-34-231-183-74.compute-1.amazonaws.com:5432/d7rs62te1d85ls
