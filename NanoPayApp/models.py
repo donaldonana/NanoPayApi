@@ -84,7 +84,7 @@ class UserProfileManager(BaseUserManager):
         c.nomCompte = user.get_full_name()
 
 
-class UserProfile(AbstractBaseUser, PermissionsMixin):
+class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
 
 
     TYPE = (
@@ -102,6 +102,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(max_length=255, unique=True, blank = True, null= True)
+    _id = models.ObjectIdField()
     nom = models.CharField(max_length=255, blank = True, null= True)
     code = models.CharField(max_length=20, blank = True, null= True)
     prenom = models.CharField(max_length=255, null= True, blank = True)
