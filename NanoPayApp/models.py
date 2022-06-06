@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser 
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 from djongo import models
 # from djangotoolbox.fields import EmbeddedModelField
 from django.utils import timezone
+
 
 # Create your models here.
 
@@ -84,6 +85,12 @@ class UserProfileManager(BaseUserManager):
         c.nomCompte = user.get_full_name()
 
 
+# class ObjectIdField(models.Field):
+#     """docstring for ClassName"""
+#     def __init__(self, *args, **kwargs):
+       
+        
+
 class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
 
 
@@ -102,7 +109,9 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
     )
 
     email = models.EmailField(max_length=255, unique=True, blank = True, null= True)
-    _id = models.ObjectIdField()
+    #id = models.PositiveIntegerField( blank = True, null= True)
+    #_id = models.ObjectIdField(auto_created=True, unique=True, primary_key=True)
+    #id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     nom = models.CharField(max_length=255, blank = True, null= True)
     code = models.CharField(max_length=20, blank = True, null= True)
     prenom = models.CharField(max_length=255, null= True, blank = True)
@@ -170,8 +179,8 @@ class Compte(models.Model):
 class ParametreCarte(models.Model):
      
     active = models.BooleanField(default=True)
-    PaiementQuotidientLimite = models.IntegerField(default=10000)
-    MontantPaimentQuotidient = models.IntegerField(default=10)
+    PaiementQuotidientLimite = models.IntegerField(default=10)
+    MontantPaimentQuotidient = models.IntegerField(default=10000)
     confirmationEnAttente = models.IntegerField(default=0)
     
 #-------------------------------------------------------------------------------------

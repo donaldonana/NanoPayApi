@@ -103,7 +103,7 @@ DATABASES = {
                 'password': 'nanojunior92',
                 'authMechanism': 'SCRAM-SHA-1'
             },
-            'ENFORCE_SCHEMA': os.environ.get("NOSQL_ENFORCE_SCHEMA", True)
+            'ENFORCE_SCHEMA': False
        }
 
        # 'default': {

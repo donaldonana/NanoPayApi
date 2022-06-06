@@ -242,7 +242,7 @@ class PaimentQuotidientView(generics.CreateAPIView):
         
         c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
         p = c.parametre
-        p.PaimentQuotidient = request.data["valeurPlafond"]
+        p.MontantPaimentQuotidient = request.data["valeurPlafond"]
         p.save()
         c.save()
         

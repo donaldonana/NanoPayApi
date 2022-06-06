@@ -37,6 +37,7 @@ class UserCodeSerializer(serializers.ModelSerializer):
     class Meta :
         model = models.UserProfile
         fields = ('phone', 'code')
+        extra_kwargs = {'code': {'required': True}} 
    
 class UserInfoSerializer(serializers.ModelSerializer):
     
@@ -126,7 +127,7 @@ class QuotidientLimiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Compte
         fields = ('numCompte','valeurLimite')  
-        extra_kwargs = {'numCompte': {'required': True}}  
+        extra_kwargs = {'numCompte': {'required': True}, 'valeurLimite': {'required': True}}  
 
         
 class PlafondLimiteSerializer(serializers.ModelSerializer): 
@@ -134,7 +135,7 @@ class PlafondLimiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Compte
         fields = ('numCompte','valeurPlafond')  
-        extra_kwargs = {'numCompte': {'required': True}}  
+        extra_kwargs = {'numCompte': {'required': True}, 'valeurPlafond': {'required': True}}  
 
 class PermissionsChangeSerializer(serializers.Serializer):
     
