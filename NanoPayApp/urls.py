@@ -18,7 +18,7 @@ router = DefaultRouter()
 urlpatterns = [
 
     #path('', include(router.urls)),
-    #path("login/", views.CustomAuthToken.as_view()),
+    path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
     path('user/info/', views.UserInfoView.as_view(), name= 'UserInfo'),
     path('user/compte/', views.CompteCreateView.as_view(), name= 'UserCompte'),
@@ -51,7 +51,7 @@ urlpatterns = [
     
     
     #path("change-password/", views.ChangePasswordView.as_view()),
-    #path("logout/", views.Logout.as_view()), UserInfoView
+    path("logout/", views.Logout.as_view()),
     #path('user/{tlephone}/', views.PurchaseList.as_view()),
     #url(r'^user/(?P<telephone>\d+)/$', views.UserList.as_view()),
 
