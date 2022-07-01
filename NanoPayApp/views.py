@@ -63,6 +63,28 @@ class UserCreateView(generics.CreateAPIView):
         
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
+class UserDeleteView(generics.CreateAPIView):
+    parser_classes = (MultiPartParser,FormParser) 
+    # serializer_class = serializers.UserInfoSerializer
+    def create(self, request, *args, **kwargs):
+        
+        phone = self.kwargs["telephone"]
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        user.delete()
+        # comptes = user.compte_set.all()
+        response = {"success" : "True", "data":None}
+       
+        
+        
+        return Response(response)
+        
+        
+        
+
+@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
 class UserCodeCreateView(generics.CreateAPIView):    
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.UserCodeSerializer
@@ -72,6 +94,9 @@ class UserCodeCreateView(generics.CreateAPIView):
         code = request.data["code"]
         user = get_user(phone)
         if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        if(user.code != code):
             return Response({"succes" : True, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         user.valide = True
