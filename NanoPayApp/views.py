@@ -32,6 +32,7 @@ from NanoPayApp import models, permissions
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from TwioloTest import SendCode
 
 
 
@@ -52,11 +53,12 @@ class UserCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() :
             serializer.save()
+            SendCode(serializer.data["phone"])
             response = {"success" : "True"}
             response["data"] = serializer.data
             return Response(response)           
         else :
-            return Response({"succes":"False", "data":None}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"succes":"False", "data":None, "detail":"Credential Already use"}, status = status.HTTP_400_BAD_REQUEST)
            
         
 
@@ -72,7 +74,6 @@ class UserCodeCreateView(generics.CreateAPIView):
         if(not user):
             return Response({"succes" : True, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
-        user = instance
         user.valide = True
         user.save()  
         serializer = self.get_serializer(user, data=request.data)
