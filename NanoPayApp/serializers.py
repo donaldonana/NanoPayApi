@@ -22,13 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
         """create the return new user"""
         
         code = "12356"
-
+        print(validated_data)
         user = models.UserProfile.objects.create_user(
             phone =  validated_data['phone'],
             password = validated_data['password'],
             code = code
         )
-
+        
         return user
     
 

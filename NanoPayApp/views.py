@@ -1,5 +1,6 @@
 from ast import For
 from email import message
+from tempfile import tempdir
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest
 from rest_framework.views import APIView
@@ -34,13 +35,30 @@ from drf_yasg import openapi
 
 
 
+def get_user(phone):
+    try:
+        return models.UserProfile.objects.get(phone = phone)
+    except models.UserProfile .DoesNotExist:
+        return None
+
+
+
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
 class UserCreateView(generics.CreateAPIView):
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.UserSerializer
     
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid() :
+            serializer.save()
+            response = {"success" : "True"}
+            response["data"] = serializer.data
+            return Response(response)           
+        else :
+            return Response({"succes":"False", "data":None}, status = status.HTTP_400_BAD_REQUEST)
+           
+        
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
 class UserCodeCreateView(generics.CreateAPIView):    
@@ -50,7 +68,11 @@ class UserCodeCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         phone = request.data["phone"]
         code = request.data["code"]
-        user = get_object_or_404(models.UserProfile ,phone = phone, code = code)
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        user = instance
         user.valide = True
         user.save()  
         serializer = self.get_serializer(user, data=request.data)
@@ -69,20 +91,26 @@ class UserInfoView(generics.CreateAPIView):
     def get_user(self, phone):
         try:
             return models.UserProfile.objects.get(phone = phone)
-        except models.UserProfile.DoesNotExist:
-            return HttpResponseBadRequest(status=status.HTTP_404_NOT_FOUND)
+        except models.UserProfile .DoesNotExist:
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+                            status = status.HTTP_404_NOT_FOUND)
         
     def create(self, request, *args, **kwargs):
         
         phone = request.data["phone"]
-        user = get_object_or_404(models.UserProfile ,phone = phone)  
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
-        response = serializer.data
-        response["compte"] = comptes.data
+        temp = serializer.data
+        temp["compte"] = comptes.data
+        response = {"success" : "True"}
+        response["data"] = temp
         
         
         return Response(response)
@@ -102,7 +130,9 @@ class UserLoginView(generics.ListAPIView):
         
         if (not user):
             
-            reponse = {"detail": "Unable to authenticate with provided credentials"}
+            reponse = {"success" : False,
+                       "data" : None,
+                       "detail": "Unable to authenticate with provided credentials"}
             
             return Response(
                         reponse,
@@ -111,13 +141,18 @@ class UserLoginView(generics.ListAPIView):
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
         return Response(
-            data = {"id": user.id,
+            data = {
+                    "sucess" : True,
+                    "data" : {
+                        "id": user.id,
                     "telephone": user.phone,
                     "nom": user.nom,
                     "prenom": user.prenom,
                     "dateDeNaissance": user.dateDeNaissance,
                     "genre": user.genre,
                     "comptes": comptes.data
+                    }
+                    
                     }
         )
           
@@ -135,14 +170,20 @@ class CompteCreateView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         phone = request.data["telephone"]
-        user = get_object_or_404(models.UserProfile ,phone = phone)
+        
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        # user = get_object_or_404(models.UserProfile ,phone = phone)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         num_compte = len(user.compte_set.all())
         if num_compte >= 10:
-            response = {"status" : "Bad request", 
-                        "message" : "This user already have most than 10 Account"}
+            response = {"succes" : False,
+                        "data" : None, 
+                        "detail" : "This user already have most than 10 Account"}
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         
         else :
@@ -161,8 +202,8 @@ class CompteCreateView(generics.CreateAPIView):
                 c.parametre = params
             c.principal = False
             c.save()
-            response = {"code":  status.HTTP_200_OK,
-                        "message" : "Succesful create Account"}
+            response = {"succes":  True,
+                        "data" : None}
             
             return Response(response,)
 
@@ -173,11 +214,21 @@ class CompteCreateView(generics.CreateAPIView):
 class UserComptesView(generics.ListAPIView):
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.CompteSerializer
-    def get_queryset(self):
+    # def get_queryset(self):
+    #     phone = self.kwargs["telephone"]
+    #     user = get_object_or_404(models.UserProfile ,phone = phone)
+    #     return user.compte_set.all()
+    def list(self, request, *args, **kwargs):
         phone = self.kwargs["telephone"]
-        user = get_object_or_404(models.UserProfile ,phone = phone)
-        return user.compte_set.all()
-
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        comptes = user.compte_set.all()
+        comptes = serializers.CompteSerializer(comptes, many = True)
+        reponse = {"sucess":True, "data": comptes.data}
+        
+        return Response(reponse)
     
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
                         operation_summary="Renvoie les informations lié à un compte"))   
@@ -188,7 +239,11 @@ class RetrieveComptesView(generics.RetrieveAPIView):
     def get_object(self):
         compte = get_object_or_404(models.Compte ,numCompte = self.kwargs["numCompte"])
         return compte
-
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({"success":True,"data":serializer.data})
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
                         operation_summary="permet d’activé/desactive une carte"))   
@@ -208,8 +263,8 @@ class ToggleCompteView(generics.CreateAPIView):
         p.save()
         c.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "Carte was toggle succesfuly"})
+        return Response({"succes": True, 
+                         "message": None})
 
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -227,8 +282,8 @@ class QuotidientLimiteView(generics.CreateAPIView):
         p.save()
         c.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "Paiement Quotidient Limite was set succesfuly"})
+        return Response({"sucess": True, 
+                         "data": None})
  
  
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -242,12 +297,12 @@ class PaimentQuotidientView(generics.CreateAPIView):
         
         c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
         p = c.parametre
-        p.MontantPaimentQuotidient = request.data["valeurPlafond"]
+        p.PaimentQuotidient = request.data["valeurPlafond"]
         p.save()
         c.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "Montant limite was set succesfuly"})
+        return Response({"sucess": True,
+                         "data": None})
 
         
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -263,14 +318,17 @@ class AddPermissionView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
-        user = get_object_or_404(models.UserProfile ,phone = request.data["TelephoneUser"])  
+        user = get_user(phone=request.data["TelephoneUser"])
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)  
         
         c.permissions.add(user)
         
         c.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "User was successfuly added"})
+        return Response({"sucess": True, 
+                         "data": None})
 
        
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -285,14 +343,17 @@ class RemovePermissionView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
-        user = get_object_or_404(models.UserProfile ,phone = request.data["TelephoneUser"])  
+        user = get_user(phone=request.data["TelephoneUser"])
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)  
         
         c.permissions.remove(user)
         
         c.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "User was successfuly removed"})
+        return Response({"succes": True, 
+                         "data": None})
 
         
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
@@ -329,9 +390,13 @@ class ContactRetreiveView(generics.ListAPIView):
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
         return Response({
-                    "nom": user.nom,
-                    "telephone": user.phone,
-                    "comptes": comptes.data
+                    "succes" : True,
+                    "data" : {
+                        "nom": user.nom,
+                        "telephone": user.phone,
+                        "comptes": comptes.data
+                    }
+                    
                     }
         )
 
@@ -352,8 +417,8 @@ class AddContactView(generics.CreateAPIView):
         
         user.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "Contact was successfuly added in User contact list"})
+        return Response({"success": True, 
+                         "data": None})
         
 class RemoveContactView(generics.CreateAPIView):
     
@@ -371,17 +436,28 @@ class RemoveContactView(generics.CreateAPIView):
         
         user.save()
         
-        return Response({"code": status.HTTP_201_CREATED, 
-                         "message": "Contact was successfuly removed in User contact list"})
+        return Response({"success": True, 
+                         "message": None})
     
-        
+    
 class ContactListView(generics.ListAPIView):
      
     serializer_class = serializers.ContactSerializers
-    def get_queryset(self):
-        user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
-        return user.contacts.all()
+    # def get_queryset(self):
+    #     user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
+    #     return user.contacts.all()
     
+    def list(self, request, *args, **kwargs):
+        phone = self.kwargs["telephone"]
+        user = get_user(phone)
+        if(not user):
+            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_404_NOT_FOUND)
+        contacts = user.contacts.all()
+        contacts = serializers.ContactSerializers(contacts, many = True)
+        reponse = {"sucess":True, "data": contacts.data}
+        
+        return Response(reponse)
     
 
 #################################################################
