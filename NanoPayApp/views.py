@@ -39,7 +39,7 @@ from TwioloTest import SendCode
 def get_user(phone):
     try:
         return models.UserProfile.objects.get(phone = phone)
-    except models.UserProfile .DoesNotExist:
+    except models.UserProfile.DoesNotExist:
         return None
 
 
@@ -378,12 +378,25 @@ class RemovePermissionView(generics.CreateAPIView):
                       
 class PermissionsListView(generics.ListAPIView):
     
-    serializer_class = serializers.PermissionsSerializer
+    serializer_class = serializers.PermissionsChangeSerializer
     
-    def get_queryset(self):
+    # def get_queryset(self):
+    #     numCompte = self.kwargs["numCompte"]
+    #     compte = get_object_or_404(models.Compte ,numCompte = numCompte)
+    #     return compte.permissions.all()
+    
+    def list(self, request, *args, **kwargs):
         numCompte = self.kwargs["numCompte"]
-        compte = get_object_or_404(models.Compte ,numCompte = numCompte)
-        return compte.permissions.all()
+        try:
+            p=models.Permissions.objects.filter(comptes=self.kwargs["numCompte"])
+            p = serializers.PermissionsChangeSerializer(p, many=True)
+            return Response({"succes" : True , "data": p.data})
+        except models.Permissions.DoesNotExist:
+            return Response({"succes": False, "data" : None},
+                            status = status.HTTP_404_NOT_FOUND)
+
+        
+    
 
 
 
