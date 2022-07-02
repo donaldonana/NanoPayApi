@@ -91,20 +91,20 @@ class PermissionsSerializer(serializers.ModelSerializer):
             
     class Meta:
         model = models.UserProfile
-        fields = ('nom', 'phone')
+        fields = '__all__'
 
         
 class CompteSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
     parametre = ParametreCarteSerializer(read_only = True)
-    permissions = PermissionsSerializer(read_only = True, many = True)
+    permission = PermissionsSerializer(read_only = True, many = True)
     
     class Meta:
         
         model = models.Compte
         fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type',
-                  'dateCreation', 'user', 'parametre', 'permissions')
+                  'dateCreation', 'user', 'parametre', 'permission')
         
         
         extra_kwargs = {
@@ -137,10 +137,13 @@ class PlafondLimiteSerializer(serializers.ModelSerializer):
         fields = ('numCompte','valeurPlafond')  
         extra_kwargs = {'numCompte': {'required': True}, 'valeurPlafond': {'required': True}}  
 
-class PermissionsChangeSerializer(serializers.Serializer):
+class PermissionsChangeSerializer(serializers.ModelSerializer):
     
-    TelephoneUser = serializers.CharField(max_length = 25 )
-    NumCompte = serializers.CharField()
+    class Meta:
+        model = models.Permissions
+        fields = '__all__'
+        
+        
 
 
 class AddContactSerializers(serializers.Serializer):

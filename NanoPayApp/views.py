@@ -65,7 +65,7 @@ class UserCreateView(generics.CreateAPIView):
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
 class UserDeleteView(generics.CreateAPIView):
     parser_classes = (MultiPartParser,FormParser) 
-    # serializer_class = serializers.UserInfoSerializer
+    serializer_class = serializers.UserInfoSerializer
     def create(self, request, *args, **kwargs):
         
         phone = self.kwargs["telephone"]
@@ -341,20 +341,18 @@ class AddPermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
+        get_object_or_404(models.Compte ,numCompte = request.data["comptes"])
+        get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
+        get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
+        
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
-        user = get_user(phone=request.data["TelephoneUser"])
-        if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)  
-        
-        c.permissions.add(user)
-        
-        c.save()
-        
-        return Response({"sucess": True, 
-                         "data": None})
+        if serializer.is_valid() :
+            serializer.save() 
+            reponse = {"success" : True , "data" : None}
+            return Response(reponse)
+        else:
+            return Response({"success" : False, "data" : None, "detail" : "Already exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
        
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -366,18 +364,11 @@ class RemovePermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        c = get_object_or_404(models.Compte ,numCompte = request.data["NumCompte"])
-        user = get_user(phone=request.data["TelephoneUser"])
-        if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)  
-        
-        c.permissions.remove(user)
-        
-        c.save()
-        
+        c=get_object_or_404(models.Compte ,numCompte = request.data["comptes"])
+        r=get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
+        e=get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
+        p=get_object_or_404(models.Permissions ,  comptes = c.numCompte , emetteur = e.phone , recepteur = r.phone )
+        p.delete()
         return Response({"succes": True, 
                          "data": None})
 

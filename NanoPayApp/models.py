@@ -156,7 +156,7 @@ class Compte(models.Model):
     
     ) 
     
-    numCompte = models.CharField(max_length = 25 , default="123")
+    numCompte = models.CharField(max_length = 25 , unique=True)
     nomCompte = models.CharField(max_length=25, blank=True, null = True)
     principal  = models.BooleanField(default=True)
     solde = models.IntegerField(default=0)
@@ -171,17 +171,21 @@ class Compte(models.Model):
         on_delete=models.CASCADE,
         blank=True, null = True
     )
-    permissions = models.ManyToManyField('UserProfile', 
-        related_name = "permissions", 
-        blank = True, null=True)
-    
     
 class ParametreCarte(models.Model):
      
-    active = models.BooleanField(default=True)
+    active = models.BooleanField(default=False)
     PaiementQuotidientLimite = models.IntegerField(default=10)
     MontantPaimentQuotidient = models.IntegerField(default=10000)
     confirmationEnAttente = models.IntegerField(default=0)
+    
+class Permissions(models.Model):
+    emetteur = models.CharField(max_length=255)
+    recepteur = models.CharField(max_length=255)
+    comptes = models.CharField(max_length=255)
+    
+    class Meta:
+        unique_together = ('emetteur', 'recepteur','comptes')
     
 #-------------------------------------------------------------------------------------
     
@@ -189,14 +193,4 @@ class Transaction(models.Model):
     
     dateHeure = models.DateTimeField(default = timezone.now)
     montant = models.IntegerField()
-    compteEmetteur = models.ForeignKey(
-        'UserProfile',
-        related_name="emetteur",
-        on_delete=models.CASCADE,
-    )
-    compteRecepteur  = models.ForeignKey(
-        'UserProfile',
-        related_name="recepteur",
-        on_delete=models.CASCADE,
-    )
-    
+   
