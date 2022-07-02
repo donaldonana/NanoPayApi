@@ -126,7 +126,7 @@ class UserInfoView(generics.CreateAPIView):
         phone = request.data["phone"]
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -199,7 +199,7 @@ class CompteCreateView(generics.CreateAPIView):
         
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         # user = get_object_or_404(models.UserProfile ,phone = phone)
         serializer = self.get_serializer(data=request.data)
@@ -248,7 +248,7 @@ class UserComptesView(generics.ListAPIView):
         phone = self.kwargs["telephone"]
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
@@ -348,7 +348,7 @@ class AddPermissionView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() :
             serializer.save() 
-            reponse = {"success" : True , "data" : None}
+            reponse = {"success" : False , "data" : None}
             return Response(reponse)
         else:
             return Response({"success" : False, "data" : None, "detail" : "Already exist"},
@@ -481,7 +481,7 @@ class ContactListView(generics.ListAPIView):
         phone = self.kwargs["telephone"]
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : True, "data":None, "detail" : "Not Found"},
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         contacts = user.contacts.all()
         contacts = serializers.ContactSerializers(contacts, many = True)
