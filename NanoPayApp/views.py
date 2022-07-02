@@ -32,7 +32,7 @@ from NanoPayApp import models, permissions
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from TwioloTest import SendCode
+# from TwioloTest import SendCode
 
 
 
@@ -53,7 +53,7 @@ class UserCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() :
             serializer.save()
-            SendCode(serializer.data["phone"])
+            # SendCode(serializer.data["phone"])
             response = {"success" : "True"}
             response["data"] = serializer.data
             return Response(response)           
