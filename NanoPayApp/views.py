@@ -42,6 +42,12 @@ def get_user(phone):
     except models.UserProfile.DoesNotExist:
         return None
 
+def get_compte(ncompte):
+    try:
+        return models.Compte.objects.get(numCompte = ncompte)
+    except:
+        return None
+
 
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
@@ -58,26 +64,25 @@ class UserCreateView(generics.CreateAPIView):
             response["data"] = serializer.data
             return Response(response)           
         else :
-            return Response({"succes":"False", "data":None, "detail":"Credential Already use"}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"success":"False", "data":None, "detail":"Credential Already use"}, status = status.HTTP_200_OK)
            
         
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Inscription']))
 class UserDeleteView(generics.CreateAPIView):
     parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.UserInfoSerializer
+    serializer_class = serializers.UserDeleteSerializer
     def create(self, request, *args, **kwargs):
         
-        phone = self.kwargs["telephone"]
+        phone = request.data["telephone"]
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            return Response({"success" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         user.delete()
         # comptes = user.compte_set.all()
         response = {"success" : "True", "data":None}
        
-        
         
         return Response(response)
         
@@ -95,16 +100,16 @@ class UserCodeCreateView(generics.CreateAPIView):
         user = get_user(phone)
         if(not user):
             return Response({"succes" : True, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            status = status.HTTP_200_OK)
         if(user.code != code):
             return Response({"succes" : True, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            status = status.HTTP_200_OK)
         user.valide = True
         user.save()  
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
-        response = {"code" : serializer.data["code"],
-                    "message" : "your Acount is successfuly activate"}
+        response = {"succes" : True,
+                    "data":None,}
         return Response(response)
         
 
@@ -131,6 +136,10 @@ class UserInfoView(generics.CreateAPIView):
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        nc = user.phone + '-01'
+        c = user.compte_set.get(user_id = user.id)
+        c.nomCompte = user.get_full_name()
+        c.save()
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
         temp = serializer.data
@@ -162,7 +171,7 @@ class UserLoginView(generics.ListAPIView):
             
             return Response(
                         reponse,
-                        status=status.HTTP_404_NOT_FOUND,   
+                        status=status.HTTP_200_OK,   
                     )
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
@@ -199,7 +208,7 @@ class CompteCreateView(generics.CreateAPIView):
         
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            return Response({"success" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_404_NOT_FOUND)
         # user = get_object_or_404(models.UserProfile ,phone = phone)
         serializer = self.get_serializer(data=request.data)
@@ -207,10 +216,10 @@ class CompteCreateView(generics.CreateAPIView):
         
         num_compte = len(user.compte_set.all())
         if num_compte >= 10:
-            response = {"succes" : False,
+            response = {"success" : False,
                         "data" : None, 
                         "detail" : "This user already have most than 10 Account"}
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
         
         else :
             
@@ -222,13 +231,14 @@ class CompteCreateView(generics.CreateAPIView):
             else:
                 c.numCompte = user.phone +"-0"+str(num_compte)
             c.type = serializer.data.get("type")
+            c.adresse = serializer.data.get("adresse")
             if c.type in ["depense",]:
                 params = models.ParametreCarte()
                 params.save()               
                 c.parametre = params
             c.principal = False
             c.save()
-            response = {"succes":  True,
+            response = {"success":  True,
                         "data" : None}
             
             return Response(response,)
@@ -248,28 +258,29 @@ class UserComptesView(generics.ListAPIView):
         phone = self.kwargs["telephone"]
         user = get_user(phone)
         if(not user):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            return Response({"success" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_200_OK)
         comptes = user.compte_set.all()
         comptes = serializers.CompteSerializer(comptes, many = True)
-        reponse = {"sucess":True, "data": comptes.data}
+        reponse = {"success":True, "data": comptes.data}
         
         return Response(reponse)
     
 @method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
                         operation_summary="Renvoie les informations lié à un compte"))   
-class RetrieveComptesView(generics.RetrieveAPIView):
+class RetrieveComptesView(generics.ListAPIView):
     parser_classes = (MultiPartParser,FormParser) 
     serializer_class = serializers.CompteSerializer
     lookup_field = "numCompte"
-    def get_object(self):
-        compte = get_object_or_404(models.Compte ,numCompte = self.kwargs["numCompte"])
-        return compte
     
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+    def list(self, request, *args, **kwargs):
+        c = get_compte(self.kwargs["numCompte"])
+        if(not c):
+            return Response({"success" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_200_OK)
+        serializer = self.get_serializer(c)
         return Response({"success":True,"data":serializer.data})
+
 
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
                         operation_summary="permet d’activé/desactive une carte"))   
@@ -280,7 +291,10 @@ class ToggleCompteView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        c = get_compte(request.data["numCompte"])
+        if(not c):
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_200_OK)
         p = c.parametre
         if p.active == True :
             p.active = False
@@ -302,7 +316,10 @@ class QuotidientLimiteView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        c = get_compte(request.data["numCompte"])
+        if(not c):
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_200_OK)
         p = c.parametre
         p.PaiementQuotidientLimite = request.data["valeurLimite"]
         p.save()
@@ -321,7 +338,10 @@ class PaimentQuotidientView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c = get_object_or_404(models.Compte ,numCompte = request.data["numCompte"])
+        c = get_compte(request.data["numCompte"])
+        if(not c):
+            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
+            status = status.HTTP_200_OK)
         p = c.parametre
         p.PaimentQuotidient = request.data["valeurPlafond"]
         p.save()

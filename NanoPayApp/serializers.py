@@ -30,7 +30,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
         
         return user
+
+
+class UserDeleteSerializer(serializers.Serializer):
     
+    telephone = serializers.CharField(max_length = 25 )
 
 class UserCodeSerializer(serializers.ModelSerializer):
     
@@ -50,7 +54,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         models.UserProfile.objects.CreateDefaultCompte(instance)
-        #models.UserProfile.objects.UpdateCompte(instance)
         return super().update(instance, validated_data)
         
 
@@ -67,14 +70,18 @@ class UserLoginSerializer(serializers.Serializer):
 class CreateCompteSerializer(serializers.Serializer):
     
     TYPE = (
-    ('entrprise', 'Entreprise'),
-    ('personel', 'Personel'),
+    ('professionnel', 'professionnel'),
     ('depense', 'depense')
     
     ) 
     telephone = serializers.CharField(max_length = 25 )
     nomCompte = serializers.CharField()
-    type = serializers.CharField(max_length=25)
+    type = serializers.ChoiceField(choices = TYPE)
+    adresse = serializers.CharField(max_length=25, required = False)
+
+    class Meta :
+        
+        extra_kwargs = {'adresse': {'required': False}} 
     
 
 class ParametreCarteSerializer(serializers.ModelSerializer):
@@ -91,7 +98,7 @@ class PermissionsSerializer(serializers.ModelSerializer):
             
     class Meta:
         model = models.UserProfile
-        fields = '__all__'
+        fields = ('nom', 'phone')
 
         
 class CompteSerializer(serializers.ModelSerializer):
@@ -103,7 +110,7 @@ class CompteSerializer(serializers.ModelSerializer):
     class Meta:
         
         model = models.Compte
-        fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type',
+        fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type', 'adresse',
                   'dateCreation', 'user', 'parametre', 'permission')
         
         

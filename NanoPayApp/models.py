@@ -80,10 +80,6 @@ class UserProfileManager(BaseUserManager):
             user.compte_set.add(c1)
             user.save()
     
-    def UpdateCompte(self, user):
-        c = user.compte_set.get(user_id = user.id)
-        c.nomCompte = user.get_full_name()
-
 
 # class ObjectIdField(models.Field):
 #     """docstring for ClassName"""
@@ -150,17 +146,17 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
 class Compte(models.Model):
     
     TYPE = (
-    ('entrprise', 'Entreprise'),
-    ('personel', 'Personel'),
+    ('professionnel', 'professionnel'),
     ('depense', 'depense')
     
     ) 
     
     numCompte = models.CharField(max_length = 25 , unique=True)
     nomCompte = models.CharField(max_length=25, blank=True, null = True)
+    adresse = models.CharField(max_length=25, blank=True, null = True)
     principal  = models.BooleanField(default=True)
     solde = models.IntegerField(default=0)
-    type = models.CharField(max_length=25, default="depense")  
+    type = models.CharField(max_length=25, choices=TYPE, default="depense")  
     dateCreation = models.DateTimeField(default = timezone.now)
     user = models.ForeignKey(
         'UserProfile',
