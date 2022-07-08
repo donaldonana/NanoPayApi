@@ -78,7 +78,7 @@ class UserDeleteView(generics.CreateAPIView):
         user = get_user(phone)
         if(not user):
             return Response({"success" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            status = status.HTTP_200_OK)
         user.delete()
         # comptes = user.compte_set.all()
         response = {"success" : "True", "data":None}
@@ -124,7 +124,7 @@ class UserInfoView(generics.CreateAPIView):
             return models.UserProfile.objects.get(phone = phone)
         except models.UserProfile .DoesNotExist:
             return Response({"succes" : True, "data":None, "detail" : "Not Found"},
-                            status = status.HTTP_404_NOT_FOUND)
+                            status = status.HTTP_200_OK)
         
     def create(self, request, *args, **kwargs):
         
@@ -132,7 +132,7 @@ class UserInfoView(generics.CreateAPIView):
         user = get_user(phone)
         if(not user):
             return Response({"succes" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            status = status.HTTP_200_OK)
         serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -209,7 +209,7 @@ class CompteCreateView(generics.CreateAPIView):
         user = get_user(phone)
         if(not user):
             return Response({"success" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_404_NOT_FOUND)
+            status = status.HTTP_200_OK)
         # user = get_object_or_404(models.UserProfile ,phone = phone)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -372,7 +372,7 @@ class AddPermissionView(generics.CreateAPIView):
             return Response(reponse)
         else:
             return Response({"success" : False, "data" : None, "detail" : "Already exist"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_200_OK)
 
        
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -413,7 +413,7 @@ class PermissionsListView(generics.ListAPIView):
             return Response({"succes" : True , "data": p.data})
         except models.Permissions.DoesNotExist:
             return Response({"succes": False, "data" : None},
-                            status = status.HTTP_404_NOT_FOUND)
+                            status = status.HTTP_200_OK)
 
         
     
