@@ -28,6 +28,8 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.contrib.auth import authenticate
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
+from Comptes.models import Compte
+import Comptes
 
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
@@ -44,7 +46,7 @@ def get_user(phone):
 
 def get_compte(ncompte):
     try:
-        return models.Compte.objects.get(numCompte = ncompte)
+        return Compte.objects.get(numCompte = ncompte)
     except:
         return None
 
@@ -137,11 +139,11 @@ class UserInfoView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         nc = user.phone + '-01'
-        c = user.compte_set.get(user_id = user.id)
+        c = user.compte_set.get(user_id = user.id, numCompte = nc)
         c.nomCompte = user.get_full_name()
         c.save()
         comptes = user.compte_set.all()
-        comptes = serializers.CompteSerializer(comptes, many = True)
+        comptes = Comptes.serializers.CompteSerializer(comptes, many = True)
         temp = serializer.data
         temp["compte"] = comptes.data
         response = {"success" : "True"}
@@ -174,7 +176,7 @@ class UserLoginView(generics.ListAPIView):
                         status=status.HTTP_200_OK,   
                     )
         comptes = user.compte_set.all()
-        comptes = serializers.CompteSerializer(comptes, many = True)
+        comptes = Comptes.serializers.CompteSerializer(comptes, many = True)
         return Response(
             data = {
                     "sucess" : True,
@@ -191,164 +193,10 @@ class UserLoginView(generics.ListAPIView):
                     }
         )
           
-           
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
-                                    operation_summary="Créer Un compte supplémentaire"))
-class CompteCreateView(generics.CreateAPIView):
-    """
-    parameters:
-        - name: name
-          description: Foobar long description goes here
-    """
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.CreateCompteSerializer
-    
-    def create(self, request, *args, **kwargs):
-        phone = request.data["telephone"]
-        
-        user = get_user(phone)
-        if(not user):
-            return Response({"success" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        # user = get_object_or_404(models.UserProfile ,phone = phone)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        num_compte = len(user.compte_set.all())
-        if num_compte >= 10:
-            response = {"success" : False,
-                        "data" : None, 
-                        "detail" : "This user already have most than 10 Account"}
-            return Response(response, status=status.HTTP_200_OK)
-        
-        else :
-            
-            c = models.Compte(user = user)
-            c.nomCompte = serializer.data.get("nomCompte")
-            num_compte = num_compte + 1
-            if num_compte == 10:   
-                c.numCompte = user.phone +"-"+str(num_compte)
-            else:
-                c.numCompte = user.phone +"-0"+str(num_compte)
-            c.type = serializer.data.get("type")
-            c.adresse = serializer.data.get("adresse")
-            if c.type in ["depense",]:
-                params = models.ParametreCarte()
-                params.save()               
-                c.parametre = params
-            c.principal = False
-            c.save()
-            response = {"success":  True,
-                        "data" : None}
-            
-            return Response(response,)
+   
 
+    
 
-@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
-                    operation_id= "Get_all_user_Account",
-                    operation_summary="renvoie la liste des comptes d'un utilisateur"))
-class UserComptesView(generics.ListAPIView):
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.CompteSerializer
-    # def get_queryset(self):
-    #     phone = self.kwargs["telephone"]
-    #     user = get_object_or_404(models.UserProfile ,phone = phone)
-    #     return user.compte_set.all()
-    def list(self, request, *args, **kwargs):
-        phone = self.kwargs["telephone"]
-        user = get_user(phone)
-        if(not user):
-            return Response({"success" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        comptes = user.compte_set.all()
-        comptes = serializers.CompteSerializer(comptes, many = True)
-        reponse = {"success":True, "data": comptes.data}
-        
-        return Response(reponse)
-    
-@method_decorator(name='get', decorator=swagger_auto_schema(tags=['Compte'],
-                        operation_summary="Renvoie les informations lié à un compte"))   
-class RetrieveComptesView(generics.ListAPIView):
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.CompteSerializer
-    lookup_field = "numCompte"
-    
-    def list(self, request, *args, **kwargs):
-        c = get_compte(self.kwargs["numCompte"])
-        if(not c):
-            return Response({"success" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        serializer = self.get_serializer(c)
-        return Response({"success":True,"data":serializer.data})
-
-
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
-                        operation_summary="permet d’activé/desactive une carte"))   
-class ToggleCompteView(generics.CreateAPIView):
-    
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.ToggleCompteSerializer
-    
-    def create(self, request, *args, **kwargs):
-        
-        c = get_compte(request.data["numCompte"])
-        if(not c):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        p = c.parametre
-        if p.active == True :
-            p.active = False
-        else: 
-            p.active = True
-        p.save()
-        c.save()
-        
-        return Response({"succes": True, 
-                         "message": None})
-
-
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
-                    operation_summary=" Permet de modifier la valeur du nombre limite de paiement sans confirmation du compte"))   
-class QuotidientLimiteView(generics.CreateAPIView):
-    
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.QuotidientLimiteSerializer
-    
-    def create(self, request, *args, **kwargs):
-        
-        c = get_compte(request.data["numCompte"])
-        if(not c):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        p = c.parametre
-        p.PaiementQuotidientLimite = request.data["valeurLimite"]
-        p.save()
-        c.save()
-        
-        return Response({"sucess": True, 
-                         "data": None})
- 
- 
-@method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
-                    operation_summary="Permet de modifier la valeur du plafond (montant maximal par opération)  de paiement sans confirmation du compte"))          
-class PaimentQuotidientView(generics.CreateAPIView):
-    
-    parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.PlafondLimiteSerializer
-    
-    def create(self, request, *args, **kwargs):
-        
-        c = get_compte(request.data["numCompte"])
-        if(not c):
-            return Response({"succes" : False, "data":None, "detail" : "Not Found"},
-            status = status.HTTP_200_OK)
-        p = c.parametre
-        p.PaimentQuotidient = request.data["valeurPlafond"]
-        p.save()
-        c.save()
-        
-        return Response({"sucess": True,
-                         "data": None})
 
         
 @method_decorator(name='post', decorator=swagger_auto_schema(tags=['Compte'],
@@ -438,7 +286,7 @@ class ContactRetreiveView(generics.ListAPIView):
         user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
         #if user in   
         comptes = user.compte_set.all()
-        comptes = serializers.CompteSerializer(comptes, many = True)
+        comptes = serializers.CompteSerializer2(comptes, many = True)
         return Response({
                     "succes" : True,
                     "data" : {
@@ -513,35 +361,6 @@ class ContactListView(generics.ListAPIView):
 #################################################################
 
 
-
-
-class UserProfileViewSet(viewsets.ModelViewSet):
-    """Handle creating and updating user profile"""
-    serializer_class = serializers.UserProfileSerializer
-    queryset = models.UserProfile.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    #permission_classes = (permissions.UpdateOwnProfile,)
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter, )
-    search_fields = ('nom', 'email','phone',)
-    filter_fields = ('phone',)
-    parser_classes = (MultiPartParser,FormParser) 
-
-    def get_user(self, id):
-        try:
-            return models.UserProfile.objects.get(id=id)
-        except models.UserProfile.DoesNotExist:
-            return HttpResponseBadRequest(status=status.HTTP_404_NOT_FOUND)
-        
-class UserList(generics.ListAPIView):
-    serializer_class = serializers.UserProfileSerializer
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the purchases for
-        the user as determined by the username portion of the URL.
-        """
-        phone = self.kwargs['telephone']
-        return models.UserProfile.objects.filter(phone=phone)
         
 class CustomAuthToken(ObtainAuthToken, CreateAPIView):
 
@@ -612,34 +431,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
       
-class CompteViewSet(viewsets.ModelViewSet):
-    """Handle creating and updating user profile"""
-    serializer_class = serializers.CompteSerializer
-    queryset = models.Compte.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (
-        IsAuthenticatedOrReadOnly,
-    )
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ('solde', 'type','numCompte',)
-    filterset_fields = ('user__nom',)
-    ordering_fields = ('solde', 'id',)
-    parser_classes = (MultiPartParser,FormParser)
-    
-    def perform_create(self, serializer):
-        """Sets the user profile to the logged in user"""
 
-        serializer.save(user=self.request.user)
-        
-    
-        
-class ParametreCarteViewSet(viewsets.ModelViewSet):
-    """Handle creating and updating user profile"""
-    serializer_class = serializers.ParametreCarteSerializer
-    queryset = models.ParametreCarte.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    
-    parser_classes = (MultiPartParser,FormParser)
     
     
         

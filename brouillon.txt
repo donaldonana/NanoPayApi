@@ -28,61 +28,61 @@ django.db.backends.
 
 
 
-pos = list(response.keys()).index('id')
-        items = list(response.items())
-        items.insert(pos+1, ('telephone',  user.phone))
-        response = dict(items)
 
 
 
-              
-class UserProfileSerializer(serializers.ModelSerializer):
-    """Serializer the user profile object"""
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Handle creating and updating user profile"""
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    #permission_classes = (permissions.UpdateOwnProfile,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter, )
+    search_fields = ('nom', 'email','phone',)
+    filter_fields = ('phone',)
+    parser_classes = (MultiPartParser,FormParser) 
 
-    def __init__(self, *args, **kwargs):
 
-        super().__init__(*args, **kwargs)
-        if self.context["request"].method == "PUT":
-            self.fields.pop("password")
-            self.fields.pop("phone")
-        if "data" in kwargs.keys():  
-            self.f = kwargs["data"]
-            
-            
-
-    class Meta:
-
-        model = models.UserProfile
-        fields = ('id', 'phone', 'email', 'code', 'valide' , 'nom', 'prenom', 'dateDeNaissance', 'password', 'url', 'is_active', 
-                  'is_staff', 'genre')
-        extra_kwargs = {
-            'password' : {
-                'write_only' : True,
-                'style' : {
-                    'input_type' : 'password'
-                }
-            }, 
-        }
         
-    def create(self, validated_data):
-        """create the return new user"""
-        if self.f is not None:
-            allowed = set(self.f.keys())
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                validated_data[field_name] = None
+class UserList(generics.ListAPIView):
+    serializer_class = serializers.UserProfileSerializer
 
-        user = models.UserProfile.objects.create_user(
-            email =  validated_data['email'],
-            nom =  validated_data['nom'],
-            phone =  validated_data['phone'],
-            prenom = validated_data['prenom'],
-            dateDeNaissance = validated_data['dateDeNaissance'],
-            password = validated_data['password']
-        )
-
-        return user
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases for
+        the user as determined by the username portion of the URL.
+        """
+        phone = self.kwargs['telephone']
+        return models.UserProfile.objects.filter(phone=phone)
 
 
+class CompteViewSet(viewsets.ModelViewSet):
+    """Handle creating and updating user profile"""
+    serializer_class = serializers.CompteSerializer2
+    queryset = Compte.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+    )
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ('solde', 'type','numCompte',)
+    filterset_fields = ('user__nom',)
+    ordering_fields = ('solde', 'id',)
+    parser_classes = (MultiPartParser,FormParser)
+    
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user"""
+
+        serializer.save(user=self.request.user)
+        
+    
+        
+# class ParametreCarteViewSet(viewsets.ModelViewSet):
+#     """Handle creating and updating user profile"""
+#     serializer_class = Comptes.serializers.ParametreCarteSerializer()
+#     queryset = models.ParametreCarte.objects.all()
+#     authentication_classes = (TokenAuthentication,)
+    
+#     parser_classes = (MultiPartParser,FormParser)
 
 postgres://ihteernthmihzn:fbbb2bade5dfb5bab5d31f44e1f1aacd5818372a6ba8d41714726bc5a658523d@ec2-34-231-183-74.compute-1.amazonaws.com:5432/d7rs62te1d85ls

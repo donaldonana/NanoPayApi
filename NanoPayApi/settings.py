@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     "rest_framework.authtoken",
     "NanoPayApp",
+    "Paiement",
+    "Comptes",
     "django_filters"
 ]
 

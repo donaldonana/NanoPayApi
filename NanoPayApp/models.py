@@ -5,6 +5,7 @@ from django.contrib.auth.models import BaseUserManager
 from djongo import models
 # from djangotoolbox.fields import EmbeddedModelField
 from django.utils import timezone
+import Comptes
 
 
 # Create your models here.
@@ -70,10 +71,11 @@ class UserProfileManager(BaseUserManager):
     def CreateDefaultCompte(self, user):
         
         if len(user.compte_set.all()) == 0:
-            c1 = Compte(user = user)
-            c1.numCompte = user.phone + '-01'
+            nc = user.phone + '-01'
+
+            c1 = Comptes.models.Compte(user = user, numCompte = nc)
             c1.nomCompte = user.get_full_name()
-            params = ParametreCarte()
+            params = Comptes.models.ParametreCarte()
             params.save()
             c1.parametre = params
             c1.save()
@@ -143,38 +145,13 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
             return
     
 
-class Compte(models.Model):
+
     
-    TYPE = (
-    ('professionnel', 'professionnel'),
-    ('depense', 'depense')
-    
-    ) 
-    
-    numCompte = models.CharField(max_length = 25 , unique=True)
-    nomCompte = models.CharField(max_length=25, blank=True, null = True)
-    adresse = models.CharField(max_length=25, blank=True, null = True)
-    principal  = models.BooleanField(default=True)
-    solde = models.IntegerField(default=0)
-    type = models.CharField(max_length=25, choices=TYPE, default="depense")  
-    dateCreation = models.DateTimeField(default = timezone.now)
-    user = models.ForeignKey(
-        'UserProfile',
-        on_delete=models.CASCADE,
-    )
-    parametre = models.ForeignKey(
-        'ParametreCarte',
-        on_delete=models.CASCADE,
-        blank=True, null = True
-    )
-    
-class ParametreCarte(models.Model):
-     
-    active = models.BooleanField(default=False)
-    PaiementQuotidientLimite = models.IntegerField(default=10)
-    MontantPaimentQuotidient = models.IntegerField(default=10000)
-    confirmationEnAttente = models.IntegerField(default=0)
-    
+
+
+
+
+
 class Permissions(models.Model):
     emetteur = models.CharField(max_length=255)
     recepteur = models.CharField(max_length=255)
@@ -185,8 +162,4 @@ class Permissions(models.Model):
     
 #-------------------------------------------------------------------------------------
     
-class Transaction(models.Model):
-    
-    dateHeure = models.DateTimeField(default = timezone.now)
-    montant = models.IntegerField()
-   
+

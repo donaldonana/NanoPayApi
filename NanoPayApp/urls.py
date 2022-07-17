@@ -21,15 +21,12 @@ urlpatterns = [
     path("login/", views.CustomAuthToken.as_view()),
     path("user/", views.UserCreateView.as_view(), name = "user", ),
     path('user/info/', views.UserInfoView.as_view(), name= 'UserInfo'),
-    path('user/compte/', views.CompteCreateView.as_view(), name= 'UserCompte'),
     path('user/code/', views.UserCodeCreateView.as_view(), name= 'UserCode'),
-    path('user/compte/carte/toggle/', views.ToggleCompteView.as_view(), name= 'ToggleCarte'),
-    path('user/compte/carte/limite/', views.QuotidientLimiteView.as_view()),
-    path('user/compte/carte/plafond/', views.PaimentQuotidientView.as_view()),
     path('user/compte/permission/add/', views.AddPermissionView.as_view()),
     path('user/compte/permission/remove/', views.RemovePermissionView.as_view()),
     path('contact/add/', views.AddContactView.as_view()),
     path('contact/remove/', views.RemoveContactView.as_view()),
+
     
     
     
@@ -38,13 +35,11 @@ urlpatterns = [
     
 
     path('user/conexion/<telephone>/<password>', views.UserLoginView.as_view()),
-    path('user/compte/<telephone>', views.UserComptesView.as_view(), name= 'UserComptes'),
     path('contact/<telephone>', views.ContactRetreiveView.as_view()),
     path("user/delete/", views.UserDeleteView.as_view(), name = "user", ),
     
     path('contact/list/<telephone>', views.ContactListView.as_view()),
     
-    path('user/compte/info/<numCompte>', views.RetrieveComptesView.as_view()),
     path('user/compte/permission/<numCompte>', views.PermissionsListView.as_view()),
     
     

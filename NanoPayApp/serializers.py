@@ -2,6 +2,7 @@ from rest_framework import fields, serializers
 from django.contrib.auth import authenticate
 
 from NanoPayApp import models
+from Comptes.models import Compte, ParametreCarte
 
 class UserSerializer(serializers.ModelSerializer):
      
@@ -89,7 +90,7 @@ class ParametreCarteSerializer(serializers.ModelSerializer):
             
     class Meta:
         
-        model = models.ParametreCarte
+        model = ParametreCarte
         fields = '__all__'
 
         
@@ -101,7 +102,7 @@ class PermissionsSerializer(serializers.ModelSerializer):
         fields = ('nom', 'phone')
 
         
-class CompteSerializer(serializers.ModelSerializer):
+class CompteSerializer2(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
     parametre = ParametreCarteSerializer(read_only = True)
@@ -109,7 +110,7 @@ class CompteSerializer(serializers.ModelSerializer):
     
     class Meta:
         
-        model = models.Compte
+        model = Compte
         fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type', 'adresse',
                   'dateCreation', 'user', 'parametre', 'permission')
         
@@ -124,32 +125,22 @@ class CompteSerializer(serializers.ModelSerializer):
       
 class ToggleCompteSerializer(serializers.ModelSerializer):    
     class Meta:
-        model = models.Compte
+        model = Compte
         fields = ('numCompte',)  
         extra_kwargs = {'numCompte': {'required': True}}    
 
         
-class QuotidientLimiteSerializer(serializers.ModelSerializer): 
-    valeurLimite = serializers.IntegerField()
-    class Meta:
-        model = models.Compte
-        fields = ('numCompte','valeurLimite')  
-        extra_kwargs = {'numCompte': {'required': True}, 'valeurLimite': {'required': True}}  
 
-        
-class PlafondLimiteSerializer(serializers.ModelSerializer): 
-    valeurPlafond = serializers.IntegerField()
-    class Meta:
-        model = models.Compte
-        fields = ('numCompte','valeurPlafond')  
-        extra_kwargs = {'numCompte': {'required': True}, 'valeurPlafond': {'required': True}}  
 
 class PermissionsChangeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = models.Permissions
-        fields = '__all__'
-        
+        fields = '__all__'        
+
+
+
+
         
 
 
@@ -161,7 +152,7 @@ class AddContactSerializers(serializers.Serializer):
     
 class ContactSerializers(serializers.ModelSerializer):
     
-    comptes = CompteSerializer( source = "compte_set", read_only = True, many = True)
+    comptes = CompteSerializer2( source = "compte_set", read_only = True, many = True)
     
     class Meta:
         model = models.UserProfile
