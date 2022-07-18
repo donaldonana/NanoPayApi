@@ -102,10 +102,10 @@ class CompteCreateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         
         num_compte = len(user.compte_set.all())
-        if num_compte >= 10:
+        if num_compte >= 10 or num_compte <= 0:
             response = {"success" : False,
                         "data" : None, 
-                        "detail" : "This user already have most than 10 Account"}
+                        "detail" : "This user already have most than 10 Account Or not already have the first Account"}
             return Response(response, status=status.HTTP_200_OK)
         
         else :
@@ -136,7 +136,7 @@ class CompteCreateView(generics.CreateAPIView):
                         operation_summary="Renvoie les informations lié à un compte"))   
 class RetrieveComptesView(generics.ListAPIView):
     parser_classes = (MultiPartParser,FormParser) 
-    serializer_class = serializers.CompteSerializer
+    serializer_class = serializers.CompteViewSerializer
     lookup_field = "numCompte"
     
     def list(self, request, *args, **kwargs):

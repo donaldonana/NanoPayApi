@@ -209,14 +209,17 @@ class AddPermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        get_object_or_404(models.Compte ,numCompte = request.data["comptes"])
-        get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
-        get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
+        c=get_object_or_404(Comptes.models.Compte  ,numCompte = request.data["comptes"])
+        r=get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
+        e=get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
         
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() :
             serializer.save() 
-            reponse = {"success" : False , "data" : None}
+            p=get_object_or_404(models.Permissions ,  comptes = c.numCompte , emetteur = e.phone , recepteur = r.phone )
+            c.permissions.add(p)
+            c.save()
+            reponse = {"success" : True , "data" : None}
             return Response(reponse)
         else:
             return Response({"success" : False, "data" : None, "detail" : "Already exist"},
@@ -232,11 +235,13 @@ class RemovePermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c=get_object_or_404(models.Compte ,numCompte = request.data["comptes"])
+        c=get_object_or_404(Comptes.models.Compte ,numCompte = request.data["comptes"])
         r=get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
         e=get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
         p=get_object_or_404(models.Permissions ,  comptes = c.numCompte , emetteur = e.phone , recepteur = r.phone )
         p.delete()
+        c.permissions.remove(p)
+        c.save()
         return Response({"succes": True, 
                          "data": None})
 
@@ -258,6 +263,9 @@ class PermissionsListView(generics.ListAPIView):
         try:
             p=models.Permissions.objects.filter(comptes=self.kwargs["numCompte"])
             p = serializers.PermissionsChangeSerializer(p, many=True)
+            if len(p.data) == 0:
+               return Response({"succes": False, "data" : None},
+                            status = status.HTTP_200_OK)
             return Response({"succes" : True , "data": p.data})
         except models.Permissions.DoesNotExist:
             return Response({"succes": False, "data" : None},

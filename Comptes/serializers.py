@@ -2,6 +2,7 @@ from rest_framework import fields, serializers
 from django.contrib.auth import authenticate
 
 from Comptes import models
+import NanoPayApp
 
 
 
@@ -52,16 +53,36 @@ class PermissionsSerializer(serializers.ModelSerializer):
 class CompteSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
-    parametre = ParametreCarteSerializer(read_only = True)
-    permission = PermissionsSerializer(read_only = True, many = True)
-    ref_name = "Compte"
+   
     
     class Meta:
         model = models.Compte
         ref_name = "Compte"
 
         fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type', 'adresse',
-                  'dateCreation', 'user', 'parametre', 'permission')
+                  'dateCreation', 'user')
+        
+        
+        extra_kwargs = {
+            'user' : {
+                'read_only' : True,
+                
+            }, 
+        }
+
+class CompteViewSerializer(serializers.ModelSerializer):
+    """Serializer the user profile object"""
+            
+    parametre = ParametreCarteSerializer(read_only = True)
+    permissions = NanoPayApp.serializers.PermissionsChangeSerializer(read_only = True, many = True)
+    
+    
+    class Meta:
+        model = models.Compte
+        # ref_name = "Compte"
+
+        fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type', 'adresse',
+                  'dateCreation', 'user', 'parametre', 'permissions')
         
         
         extra_kwargs = {

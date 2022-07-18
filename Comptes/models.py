@@ -1,7 +1,7 @@
 from django.db import models
  
 from djongo import models
-from NanoPayApp.models import UserProfile
+from NanoPayApp.models import UserProfile, Permissions
 from django.utils import timezone
 
 class Compte(models.Model):
@@ -26,6 +26,10 @@ class Compte(models.Model):
     parametre = models.ForeignKey(
         'ParametreCarte',
         on_delete=models.CASCADE,
+        blank=True, null = True
+    )
+    permissions = models.ManyToManyField(
+        Permissions,
         blank=True, null = True
     )
 
