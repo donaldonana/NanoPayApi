@@ -5,7 +5,7 @@ from django.contrib.auth.models import BaseUserManager
 from djongo import models
 # from djangotoolbox.fields import EmbeddedModelField
 from django.utils import timezone
-import Comptes
+import AppsComptes
 
 
 # Create your models here.
@@ -73,9 +73,9 @@ class UserProfileManager(BaseUserManager):
         if len(user.compte_set.all()) == 0:
             nc = user.phone + '-01'
 
-            c1 = Comptes.models.Compte(user = user, numCompte = nc)
+            c1 = AppsComptes.models.Compte(user = user, numCompte = nc)
             c1.nomCompte = user.get_full_name()
-            params = Comptes.models.ParametreCarte()
+            params = AppsComptes.models.ParametreCarte()
             params.save()
             c1.parametre = params
             c1.save()

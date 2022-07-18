@@ -28,8 +28,8 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.contrib.auth import authenticate
 from NanoPayApp import serializers
 from NanoPayApp import models, permissions
-from Comptes.models import Compte
-import Comptes
+from AppsComptes.models import Compte
+import AppsComptes
 
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
@@ -143,7 +143,7 @@ class UserInfoView(generics.CreateAPIView):
         c.nomCompte = user.get_full_name()
         c.save()
         comptes = user.compte_set.all()
-        comptes = Comptes.serializers.CompteSerializer(comptes, many = True)
+        comptes = AppsComptes.serializers.CompteSerializer(comptes, many = True)
         temp = serializer.data
         temp["compte"] = comptes.data
         response = {"success" : "True"}
@@ -176,7 +176,7 @@ class UserLoginView(generics.ListAPIView):
                         status=status.HTTP_200_OK,   
                     )
         comptes = user.compte_set.all()
-        comptes = Comptes.serializers.CompteSerializer(comptes, many = True)
+        comptes = AppsComptes.serializers.CompteSerializer(comptes, many = True)
         return Response(
             data = {
                     "sucess" : True,
@@ -209,7 +209,7 @@ class AddPermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c=get_object_or_404(Comptes.models.Compte  ,numCompte = request.data["comptes"])
+        c=get_object_or_404(AppsComptes.models.Compte  ,numCompte = request.data["comptes"])
         r=get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
         e=get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
         
@@ -235,7 +235,7 @@ class RemovePermissionView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         
-        c=get_object_or_404(Comptes.models.Compte ,numCompte = request.data["comptes"])
+        c=get_object_or_404(AppsComptes.models.Compte ,numCompte = request.data["comptes"])
         r=get_object_or_404(models.UserProfile ,phone = request.data["recepteur"])
         e=get_object_or_404(models.UserProfile ,phone = request.data["emetteur"])
         p=get_object_or_404(models.Permissions ,  comptes = c.numCompte , emetteur = e.phone , recepteur = r.phone )

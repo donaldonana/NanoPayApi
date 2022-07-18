@@ -2,7 +2,7 @@ from rest_framework import fields, serializers
 from django.contrib.auth import authenticate
 
 from NanoPayApp import models
-from Comptes.models import Compte, ParametreCarte
+from AppsComptes.models import Compte, ParametreCarte
 
 class UserSerializer(serializers.ModelSerializer):
      

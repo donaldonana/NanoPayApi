@@ -2,7 +2,7 @@ from django.db import models
  
 from djongo import models
 from NanoPayApp.models import UserProfile
-from Comptes.models import Compte
+from AppsComptes.models import Compte
 from django.utils import timezone
 
  

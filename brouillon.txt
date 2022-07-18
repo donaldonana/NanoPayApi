@@ -79,10 +79,17 @@ class CompteViewSet(viewsets.ModelViewSet):
         
 # class ParametreCarteViewSet(viewsets.ModelViewSet):
 #     """Handle creating and updating user profile"""
-#     serializer_class = Comptes.serializers.ParametreCarteSerializer()
+#     serializer_class = AppsComptes.serializers.ParametreCarteSerializer()
 #     queryset = models.ParametreCarte.objects.all()
 #     authentication_classes = (TokenAuthentication,)
     
 #     parser_classes = (MultiPartParser,FormParser)
 
 postgres://ihteernthmihzn:fbbb2bade5dfb5bab5d31f44e1f1aacd5818372a6ba8d41714726bc5a658523d@ec2-34-231-183-74.compute-1.amazonaws.com:5432/d7rs62te1d85ls
+
+
+UPDATE django_content_type SET app_label='AppsComptes' WHERE app_label='Comptes';
+
+UPDATE django_content_type SET name='AppsComptes_Comptes' where name='<oldModelName>' AND app_label='<OldAppName>'
+
+ALTER TABLE Comptes_Compte RENAME TO AppsComptes_Compte;

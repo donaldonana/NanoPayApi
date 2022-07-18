@@ -43,7 +43,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('NanoPayApp.urls')),
     path('paye/', include('Paiement.urls')),
-    path('api/', include('Comptes.urls')),
+    path('api/', include('AppsComptes.urls')),
 
 
 

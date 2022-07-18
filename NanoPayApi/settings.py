@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "NanoPayApp",
     "Paiement",
-    "Comptes",
+    "AppsComptes",
     "django_filters"
 ]
 
