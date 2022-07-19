@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "crispy_forms",
     "rest_framework.authtoken",
-    "NanoPayApp",
+    "AppsUser",
     "Paiement",
     "AppsComptes",
     "django_filters"
@@ -158,7 +158,7 @@ MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-AUTH_USER_MODEL = "NanoPayApp.UserProfile"
+AUTH_USER_MODEL = "AppsUser.UserProfile"
 
 
 django_heroku.settings(locals())

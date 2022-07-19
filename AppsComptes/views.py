@@ -27,8 +27,8 @@ from rest_framework.permissions import (
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.contrib.auth import authenticate
 from AppsComptes import serializers
-from NanoPayApp import permissions
-from NanoPayApp.models import UserProfile
+from AppsUser import permissions
+from AppsUser.models import UserProfile
 
 from AppsComptes import models
 

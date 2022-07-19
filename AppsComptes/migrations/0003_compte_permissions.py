@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('NanoPayApp', '0001_initial'),
+        ('AppsUser', '0001_initial'),
         ('AppsComptes', '0002_auto_20220717_0922'),
     ]
 
@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='compte',
             name='permissions',
-            field=models.ManyToManyField(blank=True, null=True, to='NanoPayApp.Permissions'),
+            field=models.ManyToManyField(blank=True, null=True, to='AppsUser.Permissions'),
         ),
     ]

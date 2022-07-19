@@ -1,7 +1,7 @@
 from django.db import models
  
 from djongo import models
-from NanoPayApp.models import UserProfile, Permissions
+from AppsUser.models import UserProfile, Permissions
 from django.utils import timezone
 
 class Compte(models.Model):

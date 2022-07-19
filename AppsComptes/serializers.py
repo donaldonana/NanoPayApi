@@ -2,7 +2,7 @@ from rest_framework import fields, serializers
 from django.contrib.auth import authenticate
 
 from AppsComptes import models
-import NanoPayApp
+import AppsUser
 
 
 
@@ -74,7 +74,7 @@ class CompteViewSerializer(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
     parametre = ParametreCarteSerializer(read_only = True)
-    permissions = NanoPayApp.serializers.PermissionsChangeSerializer(read_only = True, many = True)
+    permissions = AppsUser.serializers.PermissionsChangeSerializer(read_only = True, many = True)
     
     
     class Meta:
