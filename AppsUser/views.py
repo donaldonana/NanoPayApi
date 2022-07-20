@@ -279,7 +279,7 @@ class PermissionsListView(generics.ListAPIView):
 
 
 class ContactRetreiveView(generics.ListAPIView):
-    """_Recherche et renvoie le contact de l'utilisateur chercher accompagné de ses comptes._
+    """_Recherche et renvoie le contacts de l'utilisateur chercher accompagné de ses comptes._
 
     Args:
         generics (_type_): _description_
@@ -317,9 +317,9 @@ class AddContactView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(models.UserProfile ,phone = request.data["telephoneUser"])
-        contact = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
+        contacts = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
         
-        user.contacts.add(contact)
+        user.contacts.add(contacts)
         
         user.save()
         
@@ -336,9 +336,9 @@ class RemoveContactView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(models.UserProfile ,phone = request.data["telephoneUser"])
-        contact = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
+        contacts = get_object_or_404(models.UserProfile ,phone = request.data["telephoneContact"]) 
         
-        user.contacts.remove(contact)
+        user.contacts.remove(contacts)
         
         user.save()
         

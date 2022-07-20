@@ -26,7 +26,9 @@ django.db.backends.
 
 
 
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 
+find . -path "*/migrations/*.pyc"  -delete
 
 
 
@@ -93,3 +95,6 @@ UPDATE django_content_type SET app_label='AppsComptes' WHERE app_label='Comptes'
 UPDATE django_content_type SET name='AppsComptes_Comptes' where name='<oldModelName>' AND app_label='<OldAppName>'
 
 ALTER TABLE Comptes_Compte RENAME TO AppsComptes_Compte;
+
+
+CREATE TABLE IF NOT EXISTS "AppsUser_userprofile_contacts" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "to_userprofile_id" integer NOT NULL REFERENCES "AppsUser_UserProfile" ("id") DEFERRABLE INITIALLY DEFERRED, "from_userprofile_id" integer NOT NULL REFERENCES "AppsUser_UserProfile" ("id") DEFERRABLE INITIALLY DEFERRED);

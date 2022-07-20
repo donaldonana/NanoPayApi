@@ -116,10 +116,12 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
     phone = models.CharField(max_length=255, unique=True)
     dateDeNaissance = models.DateField(blank = True, null = True)
     genre = models.CharField(max_length=25, choices=Genre, blank = True, null= True)
-    valide = models.BooleanField(default=False)
+   
     contacts  = models.ManyToManyField('self', 
         symmetrical = False , 
-        related_name = "contact", 
+        # through='contact',
+        # related_name = "cont", 
+        null = True,
         blank = True)
     
     
@@ -145,10 +147,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
             return
     
 
-
     
-
-
 
 
 
