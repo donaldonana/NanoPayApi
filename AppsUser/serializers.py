@@ -50,6 +50,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = models.UserProfile
         fields = ('id', 'phone', 'nom', 'prenom', 'dateDeNaissance',
                   'genre')
+
+        extra_kwargs = {'nom': {'required': True}, 'prenom': {'required': True}, } 
         
         
     
@@ -102,17 +104,15 @@ class PermissionsSerializer(serializers.ModelSerializer):
         fields = ('nom', 'phone')
 
         
-class CompteSerializer2(serializers.ModelSerializer):
+class ContactCompteSerializers(serializers.ModelSerializer):
     """Serializer the user profile object"""
             
-    parametre = ParametreCarteSerializer(read_only = True)
-    permission = PermissionsSerializer(read_only = True, many = True)
+
     
     class Meta:
         
         model = Compte
-        fields = ('id', 'numCompte', 'nomCompte', 'principal', 'solde', 'type', 'adresse',
-                  'dateCreation', 'user', 'parametre', 'permission')
+        fields = ('id', 'numCompte', 'nomCompte', 'type')
         
         
         extra_kwargs = {
@@ -152,7 +152,7 @@ class AddContactSerializers(serializers.Serializer):
     
 class ContactSerializers(serializers.ModelSerializer):
     
-    comptes = CompteSerializer2( source = "compte_set", read_only = True, many = True)
+    comptes = ContactCompteSerializers( source = "compte_set", read_only = True, many = True)
     
     class Meta:
         model = models.UserProfile

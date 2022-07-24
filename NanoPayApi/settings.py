@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "rest_framework.authtoken",
     "AppsUser",
-    "Paiement",
+    "AppsPaiement",
     "AppsComptes",
     "django_filters"
 ]

@@ -98,3 +98,26 @@ ALTER TABLE Comptes_Compte RENAME TO AppsComptes_Compte;
 
 
 CREATE TABLE IF NOT EXISTS "AppsUser_userprofile_contacts" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "to_userprofile_id" integer NOT NULL REFERENCES "AppsUser_UserProfile" ("id") DEFERRABLE INITIALLY DEFERRED, "from_userprofile_id" integer NOT NULL REFERENCES "AppsUser_UserProfile" ("id") DEFERRABLE INITIALLY DEFERRED);
+
+
+NanoPayApp_userprofile_contacts
+db.NanoPayApp_userprofile_contacts.renameCollection("AppsUser_userprofile_contacts")
+
+Comptes_parametrecarte
+db.Comptes_parametrecarte.renameCollection("AppsComptes_parametrecarte")
+
+id
+:
+15
+app
+:
+"NanoPayApp"
+name
+:
+"0001_initial"
+applied
+:
+2022-07-03T05:34:57.940+00:00
+
+
+ALTER TABLE AppsUser_UserProfile ALTER COLUMN id SET DEFAULT nextval('AppsUser_UserProfile_id_seq'::regclass);

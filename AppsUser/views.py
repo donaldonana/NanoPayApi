@@ -26,14 +26,16 @@ from rest_framework.permissions import (
 )
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.contrib.auth import authenticate
-from AppsUser import serializers
-from AppsUser import models, permissions
-from AppsComptes.models import Compte
-import AppsComptes
+
 
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+from AppsUser import serializers
+from AppsUser import models, permissions
+from AppsComptes.models import Compte
+import AppsComptes
 # from TwioloTest import SendCode
 
 
@@ -60,6 +62,10 @@ class UserCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() :
+
+            print("\n---------------------------------\n")
+            print(serializer.validated_data)
+
             serializer.save()
             # SendCode(serializer.data["phone"])
             response = {"success" : "True"}
@@ -294,7 +300,7 @@ class ContactRetreiveView(generics.ListAPIView):
         user = get_object_or_404(models.UserProfile ,phone = self.kwargs["telephone"])
         #if user in   
         comptes = user.compte_set.all()
-        comptes = serializers.CompteSerializer2(comptes, many = True)
+        comptes = AppsComptes.serializers.CompteSerializer(comptes, many = True)
         return Response({
                     "succes" : True,
                     "data" : {
