@@ -126,6 +126,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
     
     
     # abonnes   = models.ForeignKey('self', related_name = "abonne", on_delete=models.CASCADE, null = True)
+    valide = models.BooleanField(default=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

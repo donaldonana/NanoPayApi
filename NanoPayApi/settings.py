@@ -153,7 +153,7 @@ USE_TZ = True
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-AUTH_USER_MODEL = "rest_api.UserProfile"
+# AUTH_USER_MODEL = "rest_api.UserProfile"
 MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
