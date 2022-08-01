@@ -189,6 +189,9 @@ class QuotidientLimiteView(generics.CreateAPIView):
         if(not c):
             return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_200_OK)
+        if c.type not in ["depense",]:
+            return Response({"succes" : False, "data":None, "detail" : "It is not the depense Account"},
+            status = status.HTTP_200_OK)
         p = c.parametre
         p.PaiementQuotidientLimite = request.data["valeurLimite"]
         p.save()
@@ -211,6 +214,9 @@ class PaimentQuotidientView(generics.CreateAPIView):
         if(not c):
             return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_200_OK)
+        if c.type not in ["depense",]:
+            return Response({"succes" : False, "data":None, "detail" : "It is not the depense Account"},
+            status = status.HTTP_200_OK)
         p = c.parametre
         p.PaimentQuotidient = request.data["valeurPlafond"]
         p.save()
@@ -232,6 +238,11 @@ class CarteInitCreateAPIView(generics.CreateAPIView):
         if(not c):
             return Response({"succes" : False, "data":None, "detail" : "Not Found"},
             status = status.HTTP_200_OK)
+
+        if c.type not in ["depense",]:
+            return Response({"succes" : False, "data":None, "detail" : "It is not the depense Account"},
+            status = status.HTTP_200_OK)
+
 
         if c.parametre.initialized == True:
             return Response({"succes" : False, "data":None, "detail" : "Initialization already done"},

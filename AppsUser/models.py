@@ -6,6 +6,7 @@ from djongo import models
 # from djangotoolbox.fields import EmbeddedModelField
 from django.utils import timezone
 import AppsComptes
+import uuid
 
 
 # Create your models here.
@@ -107,9 +108,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, models.Model):
     )
 
     email = models.EmailField(max_length=255, unique=True, blank = True, null= True)
-    #id = models.PositiveIntegerField( blank = True, null= True)
+    # id = models.PositiveIntegerField(auto_created=True, primary_key=True, serialize=False)
     #_id = models.ObjectIdField(auto_created=True, unique=True, primary_key=True)
-    #id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
     nom = models.CharField(max_length=255, blank = True, null= True)
     code = models.CharField(max_length=20, blank = True, null= True)
     prenom = models.CharField(max_length=255, null= True, blank = True)

@@ -38,6 +38,8 @@ class ParametreCarte(models.Model):
      
     active = models.BooleanField(default=False)
     PaiementQuotidientLimite = models.IntegerField(default=10)
+    id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+    
     MontantPaimentQuotidient = models.IntegerField(default=10000)
     confirmationEnAttente = models.IntegerField(default=0)
     uid = models.CharField(max_length = 25 ,  blank=True, null=True)

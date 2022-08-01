@@ -61,7 +61,7 @@ class UserCreateView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid() :
+        if serializer.is_valid(raise_exception=True) :
 
             print("\n---------------------------------\n")
             print(serializer.validated_data)
@@ -269,9 +269,9 @@ class PermissionsListView(generics.ListAPIView):
         try:
             p=models.Permissions.objects.filter(comptes=self.kwargs["numCompte"])
             p = serializers.PermissionsChangeSerializer(p, many=True)
-            if len(p.data) == 0:
-               return Response({"succes": False, "data" : None},
-                            status = status.HTTP_200_OK)
+            # if len(p.data) == 0:
+            #    return Response({"succes": True, "data" : []},
+            #                 status = status.HTTP_200_OK)
             return Response({"succes" : True , "data": p.data})
         except models.Permissions.DoesNotExist:
             return Response({"succes": False, "data" : None},
